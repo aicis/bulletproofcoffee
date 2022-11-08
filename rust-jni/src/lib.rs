@@ -7,7 +7,7 @@ use bulletproofs::{BulletproofGens, PedersenGens, RangeProof};
 use curve25519_dalek::ristretto::CompressedRistretto;
 use curve25519_dalek::scalar::Scalar;
 use jni::objects::{JClass, JObject, JValue};
-use jni::sys::{jboolean, jlong, jobject};
+use jni::sys::{jboolean, jlong, jobject, jint};
 use jni::JNIEnv;
 use merlin::Transcript;
 use rand::thread_rng;
@@ -21,17 +21,18 @@ const BULLET_PROOF_EXCEPTION_CLASS: &str = "dk/alexandra/bulletproofcoffee/Bulle
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_FFI_prove(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_FFI_proveRange(
     env: JNIEnv,
     _jclass: JClass,
     secret: jlong,
+    bound: jint,
 ) -> jobject {
-    match prove(env, secret) {
+    match prove(env, secret, bound) {
         Ok(res) => *res,
-        Err(_) => {
+        Err(e) => {
             env.throw_new(
                 BULLET_PROOF_EXCEPTION_CLASS,
-                "Error constructing rangeproof",
+                e.to_string()
             )
             .unwrap();
             *JObject::null()
@@ -55,8 +56,9 @@ fn bytes_to_jobject<'a>(
     Ok(object)
 }
 
-fn prove(env: JNIEnv, secret: jlong) -> Result<JObject, Box<dyn Error>> {
+fn prove(env: JNIEnv, secret: jlong, bound: jint) -> Result<JObject, Box<dyn Error>> {
     let secret = secret.unsigned_abs();
+    let bound = bound.unsigned_abs() as usize;
 
     let pc_gens = PedersenGens::default();
     let bp_gens = BulletproofGens::new(64, 1);
@@ -68,7 +70,7 @@ fn prove(env: JNIEnv, secret: jlong) -> Result<JObject, Box<dyn Error>> {
         &mut prover_transcript,
         secret,
         &blinding,
-        32,
+        bound,
     )?;
 
     let proof = proof.to_bytes();
@@ -97,8 +99,8 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_FFI_verify(
 ) -> jboolean {
     match verify(env, proof, commit) {
         Ok(res) => res,
-        Err(_) => {
-            env.throw_new(BULLET_PROOF_EXCEPTION_CLASS, "Error verifying rangeproof")
+        Err(e) => {
+            env.throw_new(BULLET_PROOF_EXCEPTION_CLASS, e.to_string())
                 .unwrap();
             0
         }
