@@ -21,7 +21,7 @@ const BULLET_PROOF_EXCEPTION_CLASS: &str = "dk/alexandra/bulletproofcoffee/Bulle
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_FFI_proveRange(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_RangeProof_proveRange(
     env: JNIEnv,
     _jclass: JClass,
     secret: jlong,
@@ -91,7 +91,7 @@ fn prove(env: JNIEnv, secret: jlong, bound: jint) -> Result<JObject, Box<dyn Err
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_FFI_verify(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_RangeProof_verify(
     env: JNIEnv,
     _jclass: JClass,
     proof: jobject,
@@ -135,46 +135,4 @@ fn verify(env: JNIEnv, proof: jobject, commit: jobject, bound: jint) -> Result<j
     let mut verifier_transcript = Transcript::new(TRANSSCRIPT_LABEL);
     let check = proof.verify_single(&bp_gens, &pc_gens, &mut verifier_transcript, &commit, bound);
     Ok(check.is_ok().into())
-}
-
-#[test]
-fn thing() {
-    let pc_gens = PedersenGens::default();
-
-    let bp_gens = BulletproofGens::new(64, 1);
-
-    // A secret value we want to prove lies in the range [0, 2^32)
-    let secret_value = 1037578891u64;
-
-    // The API takes a blinding factor for the commitment.
-    let blinding = Scalar::random(&mut thread_rng());
-
-    // The proof can be chained to an existing transcript.
-    // Here we create a transcript with a doctest domain separator.
-    let mut prover_transcript = Transcript::new(b"doctest example");
-
-    // Create a 32-bit rangeproof.
-    let (proof, committed_value) = RangeProof::prove_single(
-        &bp_gens,
-        &pc_gens,
-        &mut prover_transcript,
-        secret_value,
-        &blinding,
-        32,
-    )
-    .expect("A real program could handle errors");
-
-    proof.to_bytes();
-
-    // Verification requires a transcript with identical initial state:
-    let mut verifier_transcript = Transcript::new(b"doctest example");
-    assert!(proof
-        .verify_single(
-            &bp_gens,
-            &pc_gens,
-            &mut verifier_transcript,
-            &committed_value,
-            32
-        )
-        .is_ok());
 }

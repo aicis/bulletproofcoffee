@@ -2,9 +2,9 @@ package dk.alexandra.bulletproofcoffee;
 
 import java.io.File;
 
-public class FFI {
+public class RangeProof {
 
-    private FFI() {}
+    private RangeProof() {}
 
     static {
         // TODO: Use a more global release version.
