@@ -26,6 +26,6 @@ public class FFI {
      * @param commitment used for verifying
      * @return true if the proof is valid
      */
-    public native static boolean verify(Proof proof, Commitment commitment);
+    public native static boolean verify(Proof proof, Commitment commitment, int bound);
 
 }

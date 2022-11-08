@@ -96,8 +96,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_FFI_verify(
     _jclass: JClass,
     proof: jobject,
     commit: jobject,
+    bound: jint
 ) -> jboolean {
-    match verify(env, proof, commit) {
+    match verify(env, proof, commit, bound) {
         Ok(res) => res,
         Err(e) => {
             env.throw_new(BULLET_PROOF_EXCEPTION_CLASS, e.to_string())
@@ -119,18 +120,20 @@ fn jobject_as_bytes(env: JNIEnv, object: jobject) -> Result<Vec<u8>, Box<dyn Err
     Ok(bytes)
 }
 
-fn verify(env: JNIEnv, proof: jobject, commit: jobject) -> Result<jboolean, Box<dyn Error>> {
+fn verify(env: JNIEnv, proof: jobject, commit: jobject, bound: jint) -> Result<jboolean, Box<dyn Error>> {
     let proof = jobject_as_bytes(env, proof)?;
     let proof = RangeProof::from_bytes(&proof)?;
 
     let commit = jobject_as_bytes(env, commit)?;
     let commit = CompressedRistretto::from_slice(&commit);
 
+    let bound = bound.unsigned_abs() as usize;
+
     let pc_gens = PedersenGens::default();
     let bp_gens = BulletproofGens::new(64, 1);
 
     let mut verifier_transcript = Transcript::new(TRANSSCRIPT_LABEL);
-    let check = proof.verify_single(&bp_gens, &pc_gens, &mut verifier_transcript, &commit, 32);
+    let check = proof.verify_single(&bp_gens, &pc_gens, &mut verifier_transcript, &commit, bound);
     Ok(check.is_ok().into())
 }
 
