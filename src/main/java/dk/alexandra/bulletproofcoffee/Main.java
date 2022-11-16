@@ -1,10 +1,25 @@
 package dk.alexandra.bulletproofcoffee;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 public class Main {
+
+    static class Test {
+        private Commitment commitment;
+        public Test() {
+            commitment = Commitment.newCommitmentFromLong(10);
+
+        }
+
+        public Commitment getCommitment() {
+            return commitment;
+        }
+    }
     public static void main(String[] args) {
-//        var pair = RangeProof.proveRange(256, 16);
+//        var pair = RangeProof.proveRange(16, 16);
 //        var proof = pair.fst();
-//        var commitment = pair.snd();
+
 //
 //        var success = RangeProof.verify(proof, commitment, 16);
 //        System.out.println("Successfully called function!");
@@ -13,7 +28,16 @@ public class Main {
 //        } else {
 //            System.err.println("Proof failed");
 //        }
-        var commit = new Commitment(10);
-        assert(commit.verify(10));
+//        var commit = new Commitment(BigInteger.TEN);
+        var test = new Test();
+        var commit = test.getCommitment();
+        System.out.println(Arrays.toString(commit.asBytes()));
+        System.out.println(Arrays.toString(commit.getBlinding()));
+
+        if (commit.verify(10)) {
+            System.out.println("Yay");
+        } else {
+            System.err.println("BAD");
+        }
     }
 }

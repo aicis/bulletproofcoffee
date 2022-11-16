@@ -1,4 +1,4 @@
-use std::error::Error;
+
 
 use crate::commitment::new_commitment;
 use crate::prelude::*;
@@ -30,7 +30,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_RangeProof_pro
     }
 }
 
-fn prove(env: JNIEnv, secret: jlong, bound: jint) -> Result<JObject, Box<dyn Error>> {
+fn prove(env: JNIEnv, secret: jlong, bound: jint) -> Result<JObject> {
     let secret = secret.unsigned_abs();
     let bound = bound.unsigned_abs() as usize;
 
@@ -49,8 +49,8 @@ fn prove(env: JNIEnv, secret: jlong, bound: jint) -> Result<JObject, Box<dyn Err
 
     let proof = proof.to_bytes();
     let proof =
-        bytes_to_jobject(&env, PROOF_CLASS, &proof).expect("Failed constructing Proof object");
-    let commit = new_commitment(&env, commitment, blinding).expect("Failed constructing Commitment object");
+        bytes_to_jobject(env, PROOF_CLASS, &proof).expect("Failed constructing Proof object");
+    let commit = new_commitment(env, commitment, blinding).expect("Failed constructing Commitment object");
     let pair = env
         .new_object(
             PAIR_CLASS,
@@ -79,7 +79,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_RangeProof_ver
     }
 }
 
-fn verify(env: JNIEnv, proof: jobject, commit: jobject, bound: jint) -> Result<jboolean, Box<dyn Error>> {
+fn verify(env: JNIEnv, proof: jobject, commit: jobject, bound: jint) -> Result<jboolean> {
     let proof = jobject_as_bytes(env, "asBytes", proof)?;
     let proof = RangeProof::from_bytes(&proof)?;
 

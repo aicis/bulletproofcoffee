@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale;
 
 public class FFILoader {
     private static boolean isLoaded;
@@ -35,5 +36,13 @@ public class FFILoader {
         }
 
         isLoaded = true;
+    }
+
+    private static String getOS() {
+        return System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+    }
+
+    private static String getArch() {
+        return System.getProperty("os.arch", "generic").toLowerCase(Locale.ENGLISH);
     }
 }
