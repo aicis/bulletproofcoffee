@@ -13,8 +13,9 @@ repositories {
 // TODO: use `cross` and name them different things when shipping
 task cargoBuild(type: Exec) {
     workingDir "rust-jni"
-    commandLine "cargo", "build", "--release"
-    commandLine "bash", "-c", "cp target/release/libjava_ffi* ../src/main/resources/native"
+    commandLine "cargo", "build", "--release" // Does not work
+    commandLine "bash", "-c", "rm ../src/main/resources/native/libjava_ffi.dylib"
+    commandLine "bash", "-c", "cp target/release/libjava_ffi.dylib ../src/main/resources/native"
 }
 
 compileJava.dependsOn cargoBuild

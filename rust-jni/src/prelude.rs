@@ -4,7 +4,7 @@ use std::error::Error;
 
 
 use jni::objects::{JObject, JValue};
-use jni::sys::{jobject};
+use jni::sys::jobject;
 use jni::JNIEnv;
 
 
@@ -37,9 +37,9 @@ pub fn bytes_to_jobject<'a>(
 /// * `env`: JNIEnv
 /// * `object`: Object for which to extract bytes, requires an `asBytes` method returning a byte
 /// array.
-pub fn jobject_as_bytes(env: JNIEnv, object: jobject) -> Result<Vec<u8>, Box<dyn Error>> {
+pub fn jobject_as_bytes(env: JNIEnv, method: &str, object: jobject) -> Result<Vec<u8>, Box<dyn Error>> {
     let object = unsafe { JObject::from_raw(object) };
-    let bytes = env.call_method(object, "asBytes", "()[B", &[])?;
+    let bytes = env.call_method(object, method, "()[B", &[])?;
     let bytes = env.convert_byte_array(*bytes.l()?)?;
     Ok(bytes)
 }
