@@ -5,19 +5,19 @@ plugins {
 group 'dk.alexandra'
 version '0.1'
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
 repositories {
     mavenCentral()
 }
 
+// TODO: add more targets and possibly find a better way
+// TODO: use `cross` and name them different things when shipping
 task cargoBuild(type: Exec) {
     workingDir "rust-jni"
     commandLine "cargo", "build", "--release"
     commandLine "bash", "-c", "cp target/release/libjava_ffi* ../src/main/resources/native"
 }
 
+compileJava.dependsOn cargoBuild
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

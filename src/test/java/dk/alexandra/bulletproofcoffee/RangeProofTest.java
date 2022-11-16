@@ -1,5 +1,6 @@
 package dk.alexandra.bulletproofcoffee;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -7,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RangeProofTest {
 
     @Test
-    public void Valid32BitProof() {
+    public void valid32BitProof() {
         var pair = RangeProof.proveRange(1037578891, 32);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -16,7 +17,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void Valid8BitProof() {
+    public void valid8BitProof() {
         var pair = RangeProof.proveRange(5, 8);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -25,7 +26,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void Invalid8BitProof() {
+    public void invalid8BitProof() {
         var pair = RangeProof.proveRange(256, 8);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -34,7 +35,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void NegativeNumbersArePositive() {
+    public void negativeNumbersArePositive() {
         var pair = RangeProof.proveRange(-1, 32);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -43,7 +44,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void NegativeNumbersArePositive8Bit() {
+    public void negativeNumbersArePositive8Bit() {
         var pair = RangeProof.proveRange(-256, 8);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -52,7 +53,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void BoundsNeedToMatch() {
+    public void boundsNeedToMatch() {
         var pair = RangeProof.proveRange(2, 8);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -61,7 +62,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void TamperedCommitFails() {
+    public void tamperedCommitFails() {
         var pair = RangeProof.proveRange(1037578891, 32);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -71,7 +72,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void TamperedProofsThrowsFails() {
+    public void tamperedProofsThrowsFails() {
         var pair = RangeProof.proveRange(1037578891, 32);
         var proof = pair.fst();
         var commitment = pair.snd();
@@ -81,7 +82,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void UnparsebleProofsThrowsExceptions() {
+    public void unparsebleProofsThrowsExceptions() {
         assertThrows(
                 BulletProofException.class,
                 () -> {
@@ -94,7 +95,7 @@ class RangeProofTest {
     }
 
     @Test
-    public void BadBoundsProduceExceptions() {
+    public void badBoundsProduceExceptions() {
         assertThrows(
             BulletProofException.class,
             () -> {
