@@ -76,7 +76,7 @@ class RangeProofTest {
         var triple = RangeProof.proveRange(1037578891, 32);
         var proof = triple.fst();
         var commitment = triple.snd();
-        proof.asBytes()[0] ^= -1;
+        proof.getBytes()[0] ^= -1;
         var success = RangeProof.verify(proof, commitment, 32);
         assertFalse(success);
     }

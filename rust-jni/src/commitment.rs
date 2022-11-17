@@ -131,7 +131,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 
 fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Option<bool> {
 
-    let commit = jobject_to_array(env, "asBytes", *object).unwrap();
+    let commit = lookup_bytes_as_array(env, *object).unwrap();
     // let commit = env.get_field(object, COMMITMENT_CLASS, "commitment").unwrap();
     // let commit : Vec<u8> = env.convert_byte_array(*commit.l().unwrap()).unwrap();
     let commit = CompressedRistretto::from_slice(&commit);
@@ -139,7 +139,7 @@ fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Op
 
     // let blinding = env.get_field(object, COMMITMENT_CLASS, "blinding").unwrap();
     // let blinding : Vec<u8> = env.convert_byte_array(*blinding.l().unwrap()).unwrap();
-    let blinding = jobject_as_bytes(env, "bytes", *blinding).unwrap();
+    let blinding = lookup_bytes(env, *blinding).unwrap();
     let blinding : [u8; 32] = blinding.try_into().expect("should never fail as input always is 32 bytes");
     let blinding = Scalar::from_bytes_mod_order(blinding);
 
@@ -157,32 +157,18 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     this : jobject, // Commitment
     other : jobject, // Commitment
 ) -> jobject {
-    let this = jobject_to_array(env, "asBytes", this).unwrap();
-    let other = jobject_to_array(env, "asBytes", other).unwrap();
+    // let thing = env.get_field(JObject::from_raw(this), "bytes", "[B").unwrap();
+    let thing = env.get_field(JObject::from_raw(this), "bytes","[B").unwrap();
+    let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
+    let this : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+
+    let thing = env.get_field(JObject::from_raw(other), "bytes","[B").unwrap();
+    let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
+    let other : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+
     let this = CompressedRistretto::from_slice(&this).decompress().unwrap();
     let other = CompressedRistretto::from_slice(&other).decompress().unwrap();
-    
+
     let new = (this + other).compress();
     *new_object(env, COMMITMENT_CLASS, new.as_bytes()).unwrap()
-}
-
-
-#[allow(non_snake_case)]
-#[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_addSelf(
-    env: JNIEnv,
-    this : jobject, // Commitment
-    other : jobject, // Commitment
-) {
-    // let thing = env.get_field(JObject::from_raw(this), "B]","bytes");
-    // let Ok(_) = thing else {
-    //     return;
-
-    // };
-
-    let this = jobject_to_array(env, "asBytes", this).unwrap();
-    let mut this = CompressedRistretto::from_slice(&this).decompress().unwrap();
-    let other = jobject_to_array(env, "asBytes", other).unwrap();
-    let other = CompressedRistretto::from_slice(&other).decompress().unwrap();
-    this += other;
 }

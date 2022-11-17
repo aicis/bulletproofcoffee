@@ -17,6 +17,8 @@ public class Commitment {
     static {
         FFILoader.loadLibrary();
     }
+
+    // JNI requires that this is called bytes
     private final byte[] bytes;
 
     // The Native JNI calls depends on this signature
@@ -45,11 +47,6 @@ public class Commitment {
      * @return a new commitment being the sum of this and the other
      */
     public native Commitment add(Commitment other);
-
-    /**
-     * @param other Commitment to add to self
-     */
-    public native void addSelf(Commitment other);
 
     /**
      * @param others Commitments to sum together

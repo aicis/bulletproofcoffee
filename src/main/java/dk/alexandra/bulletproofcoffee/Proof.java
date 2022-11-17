@@ -2,15 +2,15 @@ package dk.alexandra.bulletproofcoffee;
 
 public class Proof {
 
-    private final byte[] proof;
+    // JNI calls depend on this being called bytes
+    private final byte[] bytes;
 
     // The Native JNI calls depends on this signature
     public Proof(byte[] proof) {
-        this.proof = proof;
+        this.bytes = proof;
     }
 
-    // The Native JNI calls depends on this signature
-    public byte[] asBytes() {
-        return proof;
+    public byte[] getBytes() {
+        return bytes;
     }
 }

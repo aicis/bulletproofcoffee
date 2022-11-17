@@ -72,10 +72,10 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_RangeProof_ver
 }
 
 fn verify(env: JNIEnv, proof: jobject, commit: jobject, bound: jint) -> Result<jboolean> {
-    let proof = jobject_as_bytes(env, "asBytes", proof)?;
+    let proof = lookup_bytes(env, proof)?;
     let proof = RangeProof::from_bytes(&proof)?;
 
-    let commit = jobject_as_bytes(env, "asBytes", commit)?;
+    let commit = lookup_bytes(env, commit)?;
     let commit = CompressedRistretto::from_slice(&commit);
 
     let bound = bound.unsigned_abs() as usize;

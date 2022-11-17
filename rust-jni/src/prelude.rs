@@ -44,11 +44,10 @@ pub fn new_object<'a>(
 /// Jobject to bytes
 ///
 /// * `env`: JNIEnv
-/// * `object`: Object for which to extract bytes, requires an `asBytes` method returning a byte
-/// array.
-pub fn jobject_as_bytes(env: JNIEnv, method: &str, object: jobject) -> Result<Vec<u8>> {
+/// * `object`: Object for which to extract bytes, requires a `bytes` field with type byte[]
+pub fn lookup_bytes(env: JNIEnv, object: jobject) -> Result<Vec<u8>> {
     let object = unsafe { JObject::from_raw(object) };
-    let bytes = env.call_method(object, method, "()[B", &[])?;
+    let bytes = env.get_field(object, "bytes","[B")?;
     let bytes = env.convert_byte_array(*bytes.l()?)?;
     Ok(bytes)
 }
@@ -59,13 +58,41 @@ pub fn jobject_as_bytes(env: JNIEnv, method: &str, object: jobject) -> Result<Ve
 /// * `env`: JNIEnv
 /// * `object`: Object for which to extract bytes, requires an `asBytes` method returning a byte
 /// array.
-pub fn jobject_to_array(env: JNIEnv, method: &str, object: jobject) -> Result<[u8; 32]> {
+pub fn lookup(env: JNIEnv, field: &str, object: jobject) -> Result<Vec<u8>> {
     let object = unsafe { JObject::from_raw(object) };
-    let bytes = env.call_method(object, method, "()[B", &[])?;
+    let bytes = env.get_field(object, field,"[B")?;
+    let bytes = env.convert_byte_array(*bytes.l()?)?;
+    Ok(bytes)
+}
+
+
+/// Jobject to bytes
+///
+/// * `env`: JNIEnv
+/// * `object`: Object for which to extract bytes, requires an `asBytes` method returning a byte
+/// array.
+pub fn lookup_bytes_as_array(env: JNIEnv, object: jobject) -> Result<[u8; 32]> {
+    let object = unsafe { JObject::from_raw(object) };
+    let bytes = env.get_field(object, "bytes","[B")?;
     let bytes = env.convert_byte_array(*bytes.l()?)?;
     let bytes : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
     Ok(bytes)
 }
+
+
+/// Jobject to bytes
+///
+/// * `env`: JNIEnv
+/// * `object`: Object for which to extract bytes, requires an `asBytes` method returning a byte
+/// array.
+pub fn lookup_as_array(env: JNIEnv, field: &str, object: jobject) -> Result<[u8; 32]> {
+    let object = unsafe { JObject::from_raw(object) };
+    let bytes = env.get_field(object, field,"[B")?;
+    let bytes = env.convert_byte_array(*bytes.l()?)?;
+    let bytes : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+    Ok(bytes)
+}
+
 
 /// Construct a pair
 ///

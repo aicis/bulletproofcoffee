@@ -26,8 +26,6 @@ public class Main {
         System.out.println(Arrays.toString(c2.asBytes()));
         System.out.println(Arrays.toString(c3.asBytes()));
 
-        c1.addSelf(c2);
-        System.out.println(Arrays.toString(c1.asBytes()));
 
     }
 }
