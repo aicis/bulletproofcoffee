@@ -6,20 +6,25 @@ import dk.alexandra.bulletproofcoffee.Util;
 import java.math.BigInteger;
 import java.util.Objects;
 
+/**
+ * Class representing a public commitment as a Compressed Ristretto255 Point.
+ * The commitment can be verified using the provided randomness
+ * {@link dk.alexandra.bulletproofcoffee.pedersen.Blinding}
+ * along with the value used in the commit phase.
+ */
 public class Commitment {
 
     static {
         FFILoader.loadLibrary();
     }
-    private final byte[] commitment;
+    private final byte[] bytes;
 
     // The Native JNI calls depends on this signature
     public Commitment(byte[] commitment) {
-        Objects.requireNonNull(commitment);
+        this.bytes = Objects.requireNonNull(commitment);
         if (commitment.length != 32) {
             throw new IllegalArgumentException("Commitment length has to be 32");
         }
-        this.commitment = commitment;
     }
 
     public native boolean verify(long value, Blinding blinding);
@@ -32,7 +37,23 @@ public class Commitment {
 
     // The Native JNI calls depends on this signature
     public byte[] asBytes() {
-        return commitment;
+        return bytes;
     }
 
+    /**
+     * @param other Commitment to add
+     * @return a new commitment being the sum of this and the other
+     */
+    public native Commitment add(Commitment other);
+
+    /**
+     * @param other Commitment to add to self
+     */
+    public native void addSelf(Commitment other);
+
+    /**
+     * @param others Commitments to sum together
+     * @return new Commitment representing to sum of the ptehrs
+     */
+    public native static Commitment sum(Commitment[] others);
 }

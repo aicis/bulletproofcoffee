@@ -31,13 +31,11 @@ class CommitmentTest {
     @Test
     void verifyWithBlinding() {
         var rand = new Random();
-        var blinding = new BigInteger(32*8, rand);
+        var blinding = new BigInteger(32*4, rand);
         var pair = Committer.commit(BigInteger.TEN, blinding);
         var commit = pair.fst();
         assertTrue(commit.verify(BigInteger.TEN, Blinding.from(blinding)));
     }
-
-
 
     @Test
     void negativeVerifyLong() {

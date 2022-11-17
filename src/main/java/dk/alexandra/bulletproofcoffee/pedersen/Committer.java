@@ -14,6 +14,7 @@ public class Committer {
 
     /**
      * @param value value to commit to using OS randomness.
+     * @return a pair consisting of generated commitment and the secret randomness to verify it
      * @throws IllegalArgumentException if value is negative.
      */
     public static native Pair<Commitment, Blinding> commit(long value);
@@ -21,6 +22,7 @@ public class Committer {
 
     /**
      * @param value Value to commit using OS randomness
+     * @return a pair consisting of generated commitment and the secret randomness to verify it
      * @throws IllegalArgumentException if the supplied BigInteger is negative or zero,
      * or over 32 bytes long.
      */
@@ -32,6 +34,7 @@ public class Committer {
     /**
      * @param value Value to commit using OS randomness
      * @param blinding randomness to hide the commitment later used to open it again
+     * @return a pair consisting of generated commitment and provided randomness
      * @throws IllegalArgumentException if the supplied BigInteger is negative or zero,
      * or over 32 bytes long.
      */

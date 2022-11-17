@@ -53,6 +53,20 @@ pub fn jobject_as_bytes(env: JNIEnv, method: &str, object: jobject) -> Result<Ve
     Ok(bytes)
 }
 
+
+/// Jobject to bytes
+///
+/// * `env`: JNIEnv
+/// * `object`: Object for which to extract bytes, requires an `asBytes` method returning a byte
+/// array.
+pub fn jobject_to_array(env: JNIEnv, method: &str, object: jobject) -> Result<[u8; 32]> {
+    let object = unsafe { JObject::from_raw(object) };
+    let bytes = env.call_method(object, method, "()[B", &[])?;
+    let bytes = env.convert_byte_array(*bytes.l()?)?;
+    let bytes : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+    Ok(bytes)
+}
+
 /// Construct a pair
 ///
 /// * `env`: JNIEnv

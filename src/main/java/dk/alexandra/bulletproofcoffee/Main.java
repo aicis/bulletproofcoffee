@@ -19,16 +19,15 @@ public class Main {
 //            System.err.println("Proof failed");
 //        }
 //        var commit = new Commitment(BigInteger.TEN);
-        var pair = Committer.commit(10);
-        var commit = pair.fst();
-        var blinding = pair.snd();
-        System.out.println(Arrays.toString(commit.asBytes()));
-        System.out.println(Arrays.toString(blinding.bytes()));
+        var c1 = Committer.commit(10).fst();
+        var c2 = Committer.commit(10).fst();
+        var c3 = c1.add(c2);
+        System.out.println(Arrays.toString(c1.asBytes()));
+        System.out.println(Arrays.toString(c2.asBytes()));
+        System.out.println(Arrays.toString(c3.asBytes()));
 
-        if (commit.verify(10, blinding)) {
-            System.out.println("Yay");
-        } else {
-            System.err.println("BAD");
-        }
+        c1.addSelf(c2);
+        System.out.println(Arrays.toString(c1.asBytes()));
+
     }
 }

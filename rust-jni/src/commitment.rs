@@ -131,10 +131,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 
 fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Option<bool> {
 
-    let commit = jobject_as_bytes(env, "asBytes", *object).unwrap();
+    let commit = jobject_to_array(env, "asBytes", *object).unwrap();
     // let commit = env.get_field(object, COMMITMENT_CLASS, "commitment").unwrap();
     // let commit : Vec<u8> = env.convert_byte_array(*commit.l().unwrap()).unwrap();
-    let commit : [u8; 32] = commit.try_into().unwrap();
     let commit = CompressedRistretto::from_slice(&commit);
     let commit = commit.decompress()?;
 
@@ -147,4 +146,43 @@ fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Op
     let pc_gens = PedersenGens::default();
     let check = pc_gens.commit(value, blinding) == commit;
     Some(check)
+}
+
+
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_add(
+    env: JNIEnv,
+    this : jobject, // Commitment
+    other : jobject, // Commitment
+) -> jobject {
+    let this = jobject_to_array(env, "asBytes", this).unwrap();
+    let other = jobject_to_array(env, "asBytes", other).unwrap();
+    let this = CompressedRistretto::from_slice(&this).decompress().unwrap();
+    let other = CompressedRistretto::from_slice(&other).decompress().unwrap();
+    
+    let new = (this + other).compress();
+    *new_object(env, COMMITMENT_CLASS, new.as_bytes()).unwrap()
+}
+
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_addSelf(
+    env: JNIEnv,
+    this : jobject, // Commitment
+    other : jobject, // Commitment
+) {
+    // let thing = env.get_field(JObject::from_raw(this), "B]","bytes");
+    // let Ok(_) = thing else {
+    //     return;
+
+    // };
+
+    let this = jobject_to_array(env, "asBytes", this).unwrap();
+    let mut this = CompressedRistretto::from_slice(&this).decompress().unwrap();
+    let other = jobject_to_array(env, "asBytes", other).unwrap();
+    let other = CompressedRistretto::from_slice(&other).decompress().unwrap();
+    this += other;
 }
