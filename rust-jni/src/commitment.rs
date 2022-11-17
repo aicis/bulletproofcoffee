@@ -13,33 +13,6 @@ use jni::sys::jbyteArray;
 use jni::JNIEnv;
 use rand::thread_rng;
 
-#[allow(non_snake_case)]
-#[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit___3B(
-    env: JNIEnv,
-    _jclass: JClass,
-    value: jbyteArray,
-) -> jobject {
-    let value = env.convert_byte_array(value).unwrap();
-    let value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
-    let value = Scalar::from_bytes_mod_order(value);
-    let blinding = Scalar::random(&mut thread_rng());
-    let pc_gens = PedersenGens::default();
-    let commit = pc_gens.commit(value, blinding);
-    let commit = commit.compress();
-    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
-    let blinding = new_object(env, BLINDING_CLASS, blinding.as_bytes()).expect("failed constructing Blinding object");
-    let pair = new_pair(env, commit, blinding);
-    match pair {
-        Ok(obj) => *obj,
-        Err(Error::Java(e)) => {
-            println!("error thing happened: {}", e);
-            *JObject::null()
-        },
-        _ => panic!("yikes")
-    }
-}
-
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -59,6 +32,68 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     *new_pair(env, commit, blinding).expect("failed to construct Commitment object")
 }
 
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit___3B(
+    env: JNIEnv,
+    _jclass: JClass,
+    value: jbyteArray,
+) -> jobject {
+    let value = env.convert_byte_array(value).unwrap();
+    let value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
+    let value = Scalar::from_bytes_mod_order(value);
+
+    let blinding = Scalar::random(&mut thread_rng());
+    let pc_gens = PedersenGens::default();
+    let commit = pc_gens.commit(value, blinding);
+    let commit = commit.compress();
+    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
+    let blinding = new_object(env, BLINDING_CLASS, blinding.as_bytes()).expect("failed constructing Blinding object");
+    let pair = new_pair(env, commit, blinding);
+    match pair {
+        Ok(obj) => *obj,
+        Err(Error::Java(e)) => {
+            println!("error thing happened: {}", e);
+            *JObject::null()
+        },
+        _ => panic!("yikes")
+    }
+}
+
+
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit___3B_3B(
+    env: JNIEnv,
+    _jclass: JClass,
+    value: jbyteArray,
+    blinding: jbyteArray,
+) -> jobject {
+    let value = env.convert_byte_array(value).unwrap();
+    let value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
+    let value = Scalar::from_bytes_mod_order(value);
+
+    let blinding = env.convert_byte_array(blinding).unwrap();
+    let blinding : [u8; 32] = blinding.try_into().expect("should never fail as input always is 32 bytes");
+    let blinding = Scalar::from_bytes_mod_order(blinding);
+
+    let pc_gens = PedersenGens::default();
+    let commit = pc_gens.commit(value, blinding);
+    let commit = commit.compress();
+    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
+    let blinding = new_object(env, BLINDING_CLASS, blinding.as_bytes()).expect("failed constructing Blinding object");
+    let pair = new_pair(env, commit, blinding);
+    match pair {
+        Ok(obj) => *obj,
+        Err(Error::Java(e)) => {
+            println!("error thing happened: {}", e);
+            *JObject::null()
+        },
+        _ => panic!("yikes")
+    }
+}
 
 #[allow(non_snake_case)]
 #[no_mangle]

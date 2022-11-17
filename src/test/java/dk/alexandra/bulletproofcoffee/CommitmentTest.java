@@ -1,10 +1,12 @@
 package dk.alexandra.bulletproofcoffee;
 
+import dk.alexandra.bulletproofcoffee.pedersen.Blinding;
 import dk.alexandra.bulletproofcoffee.pedersen.Commitment;
 import dk.alexandra.bulletproofcoffee.pedersen.Committer;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +27,17 @@ class CommitmentTest {
         var blinding = pair.snd();
         assertTrue(commit.verify(BigInteger.TEN, blinding));
     }
+
+    @Test
+    void verifyWithBlinding() {
+        var rand = new Random();
+        var blinding = new BigInteger(32*8, rand);
+        var pair = Committer.commit(BigInteger.TEN, blinding);
+        var commit = pair.fst();
+        assertTrue(commit.verify(BigInteger.TEN, Blinding.from(blinding)));
+    }
+
+
 
     @Test
     void negativeVerifyLong() {
