@@ -15,7 +15,7 @@ use rand::thread_rng;
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_Commitment_newCommitmentFromBytes(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit___3B(
     env: JNIEnv,
     _jclass: JClass,
     value: jbyteArray,
@@ -27,8 +27,10 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_Commitment_new
     let pc_gens = PedersenGens::default();
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
-    let commit = new_commitment(env, commit, blinding);
-    match commit {
+    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
+    let blinding = new_object(env, BLINDING_CLASS, blinding.as_bytes()).expect("failed constructing Blinding object");
+    let pair = new_pair(env, commit, blinding);
+    match pair {
         Ok(obj) => *obj,
         Err(Error::Java(e)) => {
             println!("error thing happened: {}", e);
@@ -41,7 +43,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_Commitment_new
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_Commitment_newCommitmentFromLong(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit__J(
     env: JNIEnv,
     _jclass: JClass,
     value: jlong,
@@ -52,57 +54,47 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_Commitment_new
     let pc_gens = PedersenGens::default();
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
-    *new_commitment(env, commit, blinding).expect("failed to construct Commitment object")
+    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
+    let blinding = new_object(env, BLINDING_CLASS, blinding.as_bytes()).expect("failed constructing Blinding object");
+    *new_pair(env, commit, blinding).expect("failed to construct Commitment object")
 }
 
-
-pub fn new_commitment(
-    env: JNIEnv,
-    commitment: CompressedRistretto,
-    blinding: Scalar,
-) -> Result<JObject> {
-    let commitment = env.byte_array_from_slice(&commitment.to_bytes())?;
-    let commitment = unsafe { JObject::from_raw(commitment) };
-    let blinding = env.byte_array_from_slice(blinding.as_bytes())?;
-    let blinding = unsafe { JObject::from_raw(blinding) };
-    println!("commit {:?}", commitment);
-    println!("blind {:?}", blinding);
-    let object = env.new_object(COMMITMENT_CLASS, "([B[B)V", &[commitment.into(), blinding.into()])?;
-    Ok(object)
-}
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_Commitment_verify__J(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_verify__JLdk_alexandra_bulletproofcoffee_pedersen_Blinding_2(
     env: JNIEnv,
     object : jobject,
-    value : jbyteArray
+    value : jbyteArray,
+    blinding : jobject,
 ) -> jboolean {
     let value = Scalar::from(value as u64);
     let object = JObject::from_raw(object);
-    verify(env, object, value).unwrap().into()
+    let blinding = JObject::from_raw(blinding);
+    verify(env, object, value, blinding).unwrap().into()
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_Commitment_verify___3B(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_verify___3BLdk_alexandra_bulletproofcoffee_pedersen_Blinding_2(
     env: JNIEnv,
     object : jobject,
-    value : jbyteArray
+    value : jbyteArray,
+    blinding : jobject,
 ) -> jboolean {
     let value = env.convert_byte_array(value).unwrap();
     let value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
     let value = Scalar::from_bytes_mod_order(value);
-
+    let blinding = JObject::from_raw(blinding);
     let object = JObject::from_raw(object);
-    let Some(check) = verify(env, object, value) else {
+    let Some(check) = verify(env, object, value, blinding) else {
         let _ = env.throw_new(BULLET_PROOF_EXCEPTION_CLASS, "Invalid commitment, not a canonical risretto point");
         return 0;
     };
     check.into()
 }
 
-fn verify(env: JNIEnv, object : JObject, value: Scalar) -> Option<bool> {
+fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Option<bool> {
 
     let commit = jobject_as_bytes(env, "asBytes", *object).unwrap();
     // let commit = env.get_field(object, COMMITMENT_CLASS, "commitment").unwrap();
@@ -113,7 +105,7 @@ fn verify(env: JNIEnv, object : JObject, value: Scalar) -> Option<bool> {
 
     // let blinding = env.get_field(object, COMMITMENT_CLASS, "blinding").unwrap();
     // let blinding : Vec<u8> = env.convert_byte_array(*blinding.l().unwrap()).unwrap();
-    let blinding = jobject_as_bytes(env, "getBlinding", *object).unwrap();
+    let blinding = jobject_as_bytes(env, "bytes", *blinding).unwrap();
     let blinding : [u8; 32] = blinding.try_into().expect("should never fail as input always is 32 bytes");
     let blinding = Scalar::from_bytes_mod_order(blinding);
 

@@ -1,21 +1,11 @@
 package dk.alexandra.bulletproofcoffee;
 
-import java.math.BigInteger;
+import dk.alexandra.bulletproofcoffee.pedersen.Committer;
+
 import java.util.Arrays;
 
 public class Main {
 
-    static class Test {
-        private Commitment commitment;
-        public Test() {
-            commitment = Commitment.newCommitmentFromLong(10);
-
-        }
-
-        public Commitment getCommitment() {
-            return commitment;
-        }
-    }
     public static void main(String[] args) {
 //        var pair = RangeProof.proveRange(16, 16);
 //        var proof = pair.fst();
@@ -29,12 +19,13 @@ public class Main {
 //            System.err.println("Proof failed");
 //        }
 //        var commit = new Commitment(BigInteger.TEN);
-        var test = new Test();
-        var commit = test.getCommitment();
+        var pair = Committer.commit(10);
+        var commit = pair.fst();
+        var blinding = pair.snd();
         System.out.println(Arrays.toString(commit.asBytes()));
-        System.out.println(Arrays.toString(commit.getBlinding()));
+        System.out.println(Arrays.toString(blinding.bytes()));
 
-        if (commit.verify(10)) {
+        if (commit.verify(10, blinding)) {
             System.out.println("Yay");
         } else {
             System.err.println("BAD");

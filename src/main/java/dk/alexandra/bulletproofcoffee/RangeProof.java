@@ -1,9 +1,7 @@
 package dk.alexandra.bulletproofcoffee;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import dk.alexandra.bulletproofcoffee.pedersen.Blinding;
+import dk.alexandra.bulletproofcoffee.pedersen.Commitment;
 
 public class RangeProof {
 
@@ -19,7 +17,7 @@ public class RangeProof {
      * @param bound upper bound `n`, must be a power of 2
      * @return a pair consisting of a proof and commitment
      */
-    public native static Pair<Proof, Commitment> proveRange(long secret, int bound);
+    public native static Triple<Proof, Commitment, Blinding> proveRange(long secret, int bound);
 
     /**
      *  Verify a range proof
