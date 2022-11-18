@@ -5,6 +5,7 @@ import dk.alexandra.bulletproofcoffee.Pair;
 import dk.alexandra.bulletproofcoffee.Util;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public class Committer {
 

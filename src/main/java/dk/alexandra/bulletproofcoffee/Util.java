@@ -19,4 +19,17 @@ public class Util {
             throw new IllegalArgumentException("Value is too large (over 256 bit)");
         }
     }
+
+    public static void reverseArray(byte[] array) {
+        int startIndex = 0;
+        int endIndex = array.length - 1;
+        while(startIndex < endIndex) {
+            byte temp = array[endIndex];
+            array[endIndex] = array[startIndex];
+            array[startIndex] = temp;
+            startIndex++;
+            endIndex--;
+        }
+    }
+
 }

@@ -13,6 +13,7 @@ pub const PROOF_CLASS: &str = "dk/alexandra/bulletproofcoffee/Proof";
 pub const PAIR_CLASS: &str = "dk/alexandra/bulletproofcoffee/Pair";
 pub const TRIPLE_CLASS: &str = "dk/alexandra/bulletproofcoffee/Triple";
 pub const BULLET_PROOF_EXCEPTION_CLASS: &str = "dk/alexandra/bulletproofcoffee/BulletProofException";
+pub const ILLEGAL_ARGUMENT_EXCEPTION_CLASS: &str = "java/lang/IllegalArgumentException";
 
 #[derive(Error, Debug)]
 pub enum Error {
