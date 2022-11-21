@@ -3,14 +3,13 @@ use crate::prelude::*;
 use bulletproofs::PedersenGens;
 use curve25519_dalek::ristretto::CompressedRistretto;
 
-use jni::sys::{jobject, jlong, jboolean};
 use jni::objects::{JClass, JObject};
+use jni::sys::{jboolean, jlong, jobject};
 
 use curve25519_dalek::scalar::Scalar;
 use jni::sys::jbyteArray;
 use jni::JNIEnv;
 use rand::thread_rng;
-
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -19,19 +18,20 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     _jclass: JClass,
     value: jlong,
 ) -> jobject {
-    let value : u64 = value as u64;
+    let value: u64 = value as u64;
     let value = Scalar::from(value);
     let blinding = Scalar::random(&mut thread_rng());
     let pc_gens = PedersenGens::default();
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
-    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
+    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes())
+        .expect("failed constructing Commitment object");
     let mut blinding = blinding.to_bytes();
     blinding.reverse(); // from little to big endian
-    let blinding = new_object(env, BLINDING_CLASS, &blinding).expect("failed constructing Blinding object");
+    let blinding =
+        new_object(env, BLINDING_CLASS, &blinding).expect("failed constructing Blinding object");
     *new_pair(env, commit, blinding).expect("failed to construct Commitment object")
 }
-
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -41,7 +41,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     value: jbyteArray,
 ) -> jobject {
     let value = env.convert_byte_array(value).unwrap();
-    let mut value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
+    let mut value: [u8; 32] = value
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
     value.reverse();
     let value = Scalar::from_bytes_mod_order(value);
 
@@ -49,22 +51,22 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let pc_gens = PedersenGens::default();
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
-    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
+    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes())
+        .expect("failed constructing Commitment object");
     let mut blinding = blinding.to_bytes();
     blinding.reverse(); // from little to big endian
-    let blinding = new_object(env, BLINDING_CLASS, &blinding).expect("failed constructing Blinding object");
+    let blinding =
+        new_object(env, BLINDING_CLASS, &blinding).expect("failed constructing Blinding object");
     let pair = new_pair(env, commit, blinding);
     match pair {
         Ok(obj) => *obj,
         Err(Error::Java(e)) => {
             println!("error thing happened: {}", e);
             *JObject::null()
-        },
-        _ => panic!("yikes")
+        }
+        _ => panic!("yikes"),
     }
 }
-
-
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -75,26 +77,32 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     blinding: jbyteArray,
 ) -> jobject {
     let value = env.convert_byte_array(value).unwrap();
-    let mut value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
+    let mut value: [u8; 32] = value
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
     value.reverse();
     let value = Scalar::from_bytes_mod_order(value);
 
     let blinding = env.convert_byte_array(blinding).unwrap();
-    let mut blinding : [u8; 32] = blinding.try_into().expect("should never fail as input always is 32 bytes");
+    let mut blinding: [u8; 32] = blinding
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
     blinding.reverse(); // from big endian to little
     let blinding = Scalar::from_bytes_mod_order(blinding);
 
     let pc_gens = PedersenGens::default();
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
-    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes()).expect("failed constructing Commitment object");
+    let commit = new_object(env, COMMITMENT_CLASS, commit.as_bytes())
+        .expect("failed constructing Commitment object");
     let mut blinding = blinding.to_bytes();
     blinding.reverse(); // from little to big endian
-    let blinding = new_object(env, BLINDING_CLASS, &blinding).expect("failed constructing Blinding object");
+    let blinding =
+        new_object(env, BLINDING_CLASS, &blinding).expect("failed constructing Blinding object");
     let pair = new_pair(env, commit, blinding);
     match pair {
         Ok(obj) => *obj,
-        _ => *JObject::null()
+        _ => *JObject::null(),
     }
 }
 
@@ -102,29 +110,36 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_verify__JLdk_alexandra_bulletproofcoffee_pedersen_Blinding_2(
     env: JNIEnv,
-    object : jobject,
-    value : jbyteArray,
-    blinding : jobject,
+    object: jobject,
+    value: jbyteArray,
+    blinding: jobject,
 ) -> jboolean {
     let value = Scalar::from(value as u64);
     let object = JObject::from_raw(object);
     let blinding = JObject::from_raw(blinding);
-    verify(env, object, value, blinding).unwrap_or_else(|| {
-        let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical commitment or blinding");
-        false
-    }).into()
+    verify(env, object, value, blinding)
+        .unwrap_or_else(|| {
+            let _ = env.throw_new(
+                ILLEGAL_ARGUMENT_EXCEPTION_CLASS,
+                "Non-canonical commitment or blinding",
+            );
+            false
+        })
+        .into()
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_verify___3BLdk_alexandra_bulletproofcoffee_pedersen_Blinding_2(
     env: JNIEnv,
-    object : jobject,
-    value : jbyteArray,
-    blinding : jobject,
+    object: jobject,
+    value: jbyteArray,
+    blinding: jobject,
 ) -> jboolean {
     let value = env.convert_byte_array(value).unwrap();
-    let mut value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
+    let mut value: [u8; 32] = value
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
     value.reverse();
     let value = Scalar::from_bytes_mod_order(value);
     let blinding = JObject::from_raw(blinding);
@@ -136,8 +151,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     check.into()
 }
 
-fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Option<bool> {
-
+fn verify(env: JNIEnv, object: JObject, value: Scalar, blinding: JObject) -> Option<bool> {
     let commit = lookup_bytes_as_array(env, *object).unwrap();
     // let commit = env.get_field(object, COMMITMENT_CLASS, "commitment").unwrap();
     // let commit : Vec<u8> = env.convert_byte_array(*commit.l().unwrap()).unwrap();
@@ -147,7 +161,9 @@ fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Op
     // let blinding = env.get_field(object, COMMITMENT_CLASS, "blinding").unwrap();
     // let blinding : Vec<u8> = env.convert_byte_array(*blinding.l().unwrap()).unwrap();
     let blinding = lookup_bytes(env, *blinding).unwrap();
-    let mut blinding : [u8; 32] = blinding.try_into().expect("should never fail as input always is 32 bytes");
+    let mut blinding: [u8; 32] = blinding
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
     blinding.reverse();
     let blinding = Scalar::from_canonical_bytes(blinding)?;
 
@@ -156,22 +172,28 @@ fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Op
     Some(check)
 }
 
-
-
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commitment_add(
     env: JNIEnv,
-    this : jobject, // Commitment
-    other : jobject, // Commitment
+    this: jobject,  // Commitment
+    other: jobject, // Commitment
 ) -> jobject {
-    let thing = env.get_field(JObject::from_raw(this), "bytes","[B").unwrap();
+    let thing = env
+        .get_field(JObject::from_raw(this), "bytes", "[B")
+        .unwrap();
     let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let this : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+    let this: [u8; 32] = bytes
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
 
-    let thing = env.get_field(JObject::from_raw(other), "bytes","[B").unwrap();
+    let thing = env
+        .get_field(JObject::from_raw(other), "bytes", "[B")
+        .unwrap();
     let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let other : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+    let other: [u8; 32] = bytes
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
 
     let this = CompressedRistretto::from_slice(&this).decompress();
     let other = CompressedRistretto::from_slice(&other).decompress();
@@ -180,30 +202,36 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
         (Some(a), Some(b)) => {
             let new = (a + b).compress();
             *new_object(env, COMMITMENT_CLASS, new.as_bytes()).unwrap()
-        },
+        }
         _ => {
             let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical form");
             *JObject::null()
         }
     }
-
 }
-
 
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Blinding_add(
     env: JNIEnv,
-    this : jobject, // Commitment
-    other : jobject, // Commitment
+    this: jobject,  // Commitment
+    other: jobject, // Commitment
 ) -> jobject {
-    let thing = env.get_field(JObject::from_raw(this), "bytes","[B").unwrap();
+    let thing = env
+        .get_field(JObject::from_raw(this), "bytes", "[B")
+        .unwrap();
     let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let mut this : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+    let mut this: [u8; 32] = bytes
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
 
-    let thing = env.get_field(JObject::from_raw(other), "bytes","[B").unwrap();
+    let thing = env
+        .get_field(JObject::from_raw(other), "bytes", "[B")
+        .unwrap();
     let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let mut other : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
+    let mut other: [u8; 32] = bytes
+        .try_into()
+        .expect("should never fail as input always is 32 bytes");
 
     this.reverse();
     other.reverse();
@@ -217,7 +245,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Blind
             new.reverse();
 
             *new_object(env, COMMITMENT_CLASS, &new).unwrap()
-        },
+        }
         _ => {
             let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical form");
             *JObject::null()
