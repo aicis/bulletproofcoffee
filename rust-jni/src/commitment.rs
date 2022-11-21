@@ -1,5 +1,3 @@
-
-
 use crate::prelude::*;
 
 use bulletproofs::PedersenGens;
@@ -23,7 +21,6 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 ) -> jobject {
     let value : u64 = value as u64;
     let value = Scalar::from(value);
-    println!("Rust Value: {:?}", value);
     let blinding = Scalar::random(&mut thread_rng());
     let pc_gens = PedersenGens::default();
     let commit = pc_gens.commit(value, blinding);
@@ -47,7 +44,6 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let mut value : [u8; 32] = value.try_into().expect("should never fail as input always is 32 bytes");
     value.reverse();
     let value = Scalar::from_bytes_mod_order(value);
-    println!("Rust Value: {:?}", value);
 
     let blinding = Scalar::random(&mut thread_rng());
     let pc_gens = PedersenGens::default();
@@ -87,7 +83,6 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let mut blinding : [u8; 32] = blinding.try_into().expect("should never fail as input always is 32 bytes");
     blinding.reverse(); // from big endian to little
     let blinding = Scalar::from_bytes_mod_order(blinding);
-    println!("Commit Value: {:?}", value);
 
     let pc_gens = PedersenGens::default();
     let commit = pc_gens.commit(value, blinding);
@@ -155,7 +150,6 @@ fn verify(env: JNIEnv, object : JObject, value: Scalar, blinding: JObject) -> Op
     let mut blinding : [u8; 32] = blinding.try_into().expect("should never fail as input always is 32 bytes");
     blinding.reverse();
     let blinding = Scalar::from_canonical_bytes(blinding)?;
-    println!("Verify Value: {:?}", value);
 
     let pc_gens = PedersenGens::default();
     let check = pc_gens.commit(value, blinding) == commit;
@@ -179,11 +173,20 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
     let other : [u8; 32] = bytes.try_into().expect("should never fail as input always is 32 bytes");
 
-    let this = CompressedRistretto::from_slice(&this).decompress().unwrap();
-    let other = CompressedRistretto::from_slice(&other).decompress().unwrap();
+    let this = CompressedRistretto::from_slice(&this).decompress();
+    let other = CompressedRistretto::from_slice(&other).decompress();
 
-    let new = (this + other).compress();
-    *new_object(env, COMMITMENT_CLASS, new.as_bytes()).unwrap()
+    match (this, other) {
+        (Some(a), Some(b)) => {
+            let new = (a + b).compress();
+            *new_object(env, COMMITMENT_CLASS, new.as_bytes()).unwrap()
+        },
+        _ => {
+            let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical form");
+            *JObject::null()
+        }
+    }
+
 }
 
 
@@ -205,12 +208,19 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Blind
     this.reverse();
     other.reverse();
 
-    let this = Scalar::from_canonical_bytes(this).expect("Scalar should be canonical");
-    let other = Scalar::from_canonical_bytes(other).expect("Scalar should be canoncial");
+    let this = Scalar::from_canonical_bytes(this);
+    let other = Scalar::from_canonical_bytes(other);
+    match (this, other) {
+        (Some(a), Some(b)) => {
+            let new = a + b;
+            let mut new = new.to_bytes();
+            new.reverse();
 
-    let new = this + other;
-    let mut new = new.to_bytes();
-    new.reverse();
-
-    *new_object(env, COMMITMENT_CLASS, &new).unwrap()
+            *new_object(env, COMMITMENT_CLASS, &new).unwrap()
+        },
+        _ => {
+            let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical form");
+            *JObject::null()
+        }
+    }
 }

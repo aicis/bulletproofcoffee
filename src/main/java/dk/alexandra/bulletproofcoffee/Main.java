@@ -9,7 +9,6 @@ import java.util.Arrays;
 public class Main {
 
     public static void main(String[] args) {
-
         var p1 = Committer.commit(new BigInteger("1"));
         var p2 = Committer.commit(new BigInteger("2"));
         var c1 = p1.fst();
@@ -21,9 +20,6 @@ public class Main {
         var b3 = b1.add(b2);
         System.out.println(b3.toBigInteger());
         System.out.println(c3.verify(new BigInteger("3"), b3));
-
-
-
 
     }
 }
