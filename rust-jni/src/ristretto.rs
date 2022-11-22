@@ -1,23 +1,21 @@
 use crate::prelude::*;
 
-
 use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
 
 use jni::objects::JObject;
 use jni::signature::ReturnType;
-use jni::sys::{jclass, jobject, jvalue, jbyteArray};
+use jni::sys::{jbyteArray, jclass, jobject, jvalue};
 
 use curve25519_dalek::scalar::Scalar;
 
 use jni::JNIEnv;
 
-
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_fromUniformBytes(
     env: JNIEnv,
-    _class : jclass,
-    bytes: jbyteArray,  // []byte
+    _class: jclass,
+    bytes: jbyteArray, // []byte
 ) -> jobject {
     let bytes = env.convert_byte_array(bytes).unwrap();
     let Ok(bytes) = bytes.try_into() else {
@@ -27,7 +25,6 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Ristr
     let point = RistrettoPoint::from_uniform_bytes(&bytes).compress();
     *new_object(env, RISTRETTO_POINT_CLASS, point.as_bytes()).unwrap()
 }
-
 
 #[allow(non_snake_case)]
 #[no_mangle]
@@ -87,7 +84,8 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Ristr
 ) -> jobject {
     let list = JObject::from_raw(list);
 
-    let size = env.call_method(list, "size", "()I", &[])
+    let size = env
+        .call_method(list, "size", "()I", &[])
         .expect("Could not call 'size()' on List");
     let size = size.i().unwrap();
 

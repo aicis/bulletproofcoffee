@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
 use bulletproofs::PedersenGens;
-use curve25519_dalek::ristretto::{CompressedRistretto};
+use curve25519_dalek::ristretto::CompressedRistretto;
 
-use jni::objects::{JClass, JObject};
+use jni::objects::JObject;
 
-use jni::sys::{jboolean, jclass, jlong, jobject};
+use jni::sys::{jboolean, jlong, jobject};
 
 use curve25519_dalek::scalar::Scalar;
 use jni::sys::jbyteArray;
@@ -18,9 +18,17 @@ fn get_pc_gens(env: JNIEnv, obj: JObject) -> PedersenGens {
         PedersenGens::default()
     } else {
         println!("Using something new");
-        let field_type = "L".to_owned()+RISTRETTO_POINT_CLASS+";";
-        let basepoint = env.get_field(obj, "basePoint", &field_type).unwrap().l().unwrap();
-        let blinding_basepoint = env.get_field(obj, "basePoint", &field_type).unwrap().l().unwrap();
+        let field_type = "L".to_owned() + RISTRETTO_POINT_CLASS + ";";
+        let basepoint = env
+            .get_field(obj, "basePoint", &field_type)
+            .unwrap()
+            .l()
+            .unwrap();
+        let blinding_basepoint = env
+            .get_field(obj, "basePoint", &field_type)
+            .unwrap()
+            .l()
+            .unwrap();
         let basepoint = lookup_bytes_as_array(env, *basepoint).unwrap();
         let blinding_basepoint = lookup_bytes_as_array(env, *blinding_basepoint).unwrap();
 
@@ -35,17 +43,16 @@ fn get_pc_gens(env: JNIEnv, obj: JObject) -> PedersenGens {
 
         PedersenGens {
             B: basepoint,
-            B_blinding: blinding_basepoint
+            B_blinding: blinding_basepoint,
         }
     }
-
 }
 
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_commit__J(
     env: JNIEnv,
-    this : jobject,
+    this: jobject,
     value: jlong,
 ) -> jobject {
     let value: u64 = value as u64;
@@ -69,7 +76,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Gener
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_commit___3B(
     env: JNIEnv,
-    this : jobject,
+    this: jobject,
     value: jbyteArray,
 ) -> jobject {
     let value = env.convert_byte_array(value).unwrap();
@@ -104,7 +111,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Gener
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_commit___3B_3B(
     env: JNIEnv,
-    this : jobject,
+    this: jobject,
     value: jbyteArray,
     blinding: jbyteArray,
 ) -> jobject {
@@ -139,7 +146,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Gener
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_verify__Ldk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_2JLdk_alexandra_bulletproofcoffee_pedersen_Scalar_2(
     env: JNIEnv,
-    this : jobject,
+    this: jobject,
     object: jobject,
     value: jbyteArray,
     blinding: jobject,
@@ -163,7 +170,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Gener
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_verify__Ldk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_2_3BLdk_alexandra_bulletproofcoffee_pedersen_Scalar_2(
     env: JNIEnv,
-    this : jobject,
+    this: jobject,
     object: jobject,
     value: jbyteArray,
     blinding: jobject,
@@ -184,7 +191,13 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Gener
     check.into()
 }
 
-fn verify(env: JNIEnv, this: JObject, object: JObject, value: Scalar, blinding: JObject) -> Option<bool> {
+fn verify(
+    env: JNIEnv,
+    this: JObject,
+    object: JObject,
+    value: Scalar,
+    blinding: JObject,
+) -> Option<bool> {
     let commit = lookup_bytes_as_array(env, *object).unwrap();
     let commit = CompressedRistretto::from_slice(&commit);
     let commit = commit.decompress()?;
