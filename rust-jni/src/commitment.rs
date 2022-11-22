@@ -1,10 +1,11 @@
 use crate::prelude::*;
 
 use bulletproofs::PedersenGens;
-use curve25519_dalek::ristretto::CompressedRistretto;
+use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
 
 use jni::objects::{JClass, JObject};
-use jni::sys::{jboolean, jlong, jobject, jclass};
+use jni::signature::ReturnType;
+use jni::sys::{jboolean, jlong, jobject, jclass, jobjectArray, jvalue};
 
 use curve25519_dalek::scalar::Scalar;
 use jni::sys::jbyteArray;
@@ -169,28 +170,41 @@ fn verify(env: JNIEnv, object: JObject, value: Scalar, blinding: JObject) -> Opt
     Some(check)
 }
 
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_mul(
+    env: JNIEnv,
+    this: jobject,  // RistrettoPoint
+    other: jobject, // Scalar
+) -> jobject {
+    let this = lookup_bytes_as_array(env, this).unwrap();
+    let other = lookup_bytes_as_array(env, other).unwrap();
+
+    let Some(point) = CompressedRistretto::from_slice(&this).decompress() else {
+        let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical form");
+        return *JObject::null();
+    };
+    let Some(scalar) = Scalar::from_canonical_bytes(other) else {
+        let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical form");
+        return *JObject::null();
+    };
+
+    let new = (point * scalar).compress();
+    *new_object(env, RISTRETTO_POINT_CLASS, new.as_bytes()).unwrap()
+}
+
+
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_add(
     env: JNIEnv,
-    this: jobject,  // Commitment
-    other: jobject, // Commitment
+    this: jobject,  // RistrettoPoint
+    other: jobject, // RistrettoPoint
 ) -> jobject {
-    let thing = env
-        .get_field(JObject::from_raw(this), "bytes", "[B")
-        .unwrap();
-    let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let this: [u8; 32] = bytes
-        .try_into()
-        .expect("should never fail as input always is 32 bytes");
 
-    let thing = env
-        .get_field(JObject::from_raw(other), "bytes", "[B")
-        .unwrap();
-    let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let other: [u8; 32] = bytes
-        .try_into()
-        .expect("should never fail as input always is 32 bytes");
+    let this = lookup_bytes_as_array(env, this).unwrap();
+    let other = lookup_bytes_as_array(env, other).unwrap();
 
     let this = CompressedRistretto::from_slice(&this).decompress();
     let other = CompressedRistretto::from_slice(&other).decompress();
@@ -207,6 +221,43 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Ristr
     }
 }
 
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_sum(
+    env: JNIEnv,
+    _class: jclass,
+    list: jobject, // List<RistrettoPoint>
+) -> jobject {
+    let list = JObject::from_raw(list);
+
+    let size = env.call_method(list, "size()", "I", &[]).unwrap();
+    let size = size.i().unwrap();
+
+
+    let method = env.get_method_id("java/util/List", "get", "(I)Ljava/lang/Object").unwrap();
+    let get = |i: i32| -> RistrettoPoint {
+        let i = jvalue{i};
+        let obj = env.call_method_unchecked(list, method, ReturnType::Object, &[i]).unwrap();
+        let bytes = lookup_bytes_as_array(env, *obj.l().unwrap()).unwrap();
+        let point = CompressedRistretto::from_slice(&bytes);
+        point.decompress().unwrap()
+    };
+
+    if size == 1 {
+        let obj = env.call_method_unchecked(list, method, ReturnType::Object, &[jvalue{i:0}]).unwrap();
+        return *obj.l().unwrap();
+    }
+
+    let mut sum = get(0);
+
+    for i in 1..size {
+         sum += get(i);
+    }
+    let sum = sum.compress();
+    *new_object(env, RISTRETTO_POINT_CLASS, sum.as_bytes()).unwrap()
+}
+
 #[allow(non_snake_case)]
 #[no_mangle]
 pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Scalar_add(
@@ -214,21 +265,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Scala
     this: jobject,  // Commitment
     other: jobject, // Commitment
 ) -> jobject {
-    let thing = env
-        .get_field(JObject::from_raw(this), "bytes", "[B")
-        .unwrap();
-    let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let mut this: [u8; 32] = bytes
-        .try_into()
-        .expect("should never fail as input always is 32 bytes");
+    let mut this = lookup_bytes_as_array(env, this).unwrap();
+    let mut other = lookup_bytes_as_array(env, other).unwrap();
 
-    let thing = env
-        .get_field(JObject::from_raw(other), "bytes", "[B")
-        .unwrap();
-    let bytes = env.convert_byte_array(*thing.l().unwrap()).unwrap();
-    let mut other: [u8; 32] = bytes
-        .try_into()
-        .expect("should never fail as input always is 32 bytes");
 
     this.reverse();
     other.reverse();
@@ -249,3 +288,5 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Scala
         }
     }
 }
+
+

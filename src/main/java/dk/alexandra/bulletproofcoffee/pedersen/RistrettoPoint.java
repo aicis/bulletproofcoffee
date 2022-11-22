@@ -4,6 +4,7 @@ import dk.alexandra.bulletproofcoffee.FFILoader;
 import dk.alexandra.bulletproofcoffee.Util;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,17 +34,25 @@ public class RistrettoPoint {
         return bytes;
     }
 
+    public static native RistrettoPoint fromHash(byte[] digest);
+
     /**
-     * @param other Commitment to add
+     * @param other Scalar to multiply with
+     * @return a new commitment being the sum of this and the other
+     */
+    public native RistrettoPoint mul(Scalar other);
+
+    /**
+     * @param other RistrettoPoint to add
      * @return a new commitment being the sum of this and the other
      */
     public native RistrettoPoint add(RistrettoPoint other);
 
     /**
-     * @param others Commitments to sum together
+     * @param others RistrettoPoints to sum together
      * @return new Commitment representing to sum of the ptehrs
      */
-    public native static RistrettoPoint sum(RistrettoPoint[] others);
+    public native static RistrettoPoint sum(List<RistrettoPoint> others);
 
 
 
