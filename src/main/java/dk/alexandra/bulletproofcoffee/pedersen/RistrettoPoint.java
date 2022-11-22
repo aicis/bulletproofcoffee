@@ -2,6 +2,7 @@ package dk.alexandra.bulletproofcoffee.pedersen;
 
 import dk.alexandra.bulletproofcoffee.FFILoader;
 import dk.alexandra.bulletproofcoffee.Util;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Native;
 import java.math.BigInteger;

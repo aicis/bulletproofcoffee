@@ -11,6 +11,10 @@ import java.util.Objects;
  * Blinding or randomness used for verifying a commitment.
  */
 public final class Scalar {
+
+    public final static BigInteger ORDER
+            = new BigInteger("57896044618658097711785492504343953926856930875039260848015607506283634007912");
+
     @Native
     private final byte[] bytes;
 
@@ -23,7 +27,7 @@ public final class Scalar {
     }
 
     public Scalar(BigInteger integer) {
-        this.bytes = Util.convertBigInteger(integer);
+        this.bytes = Util.convertBigInteger(integer.mod(ORDER));
     }
 
     public BigInteger toBigInteger() {

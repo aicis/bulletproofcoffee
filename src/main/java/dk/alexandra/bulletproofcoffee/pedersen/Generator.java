@@ -3,6 +3,7 @@ package dk.alexandra.bulletproofcoffee.pedersen;
 import dk.alexandra.bulletproofcoffee.FFILoader;
 import dk.alexandra.bulletproofcoffee.Pair;
 import dk.alexandra.bulletproofcoffee.Util;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Native;
 import java.math.BigInteger;
@@ -13,23 +14,27 @@ public class Generator {
         FFILoader.loadLibrary();
     }
 
+
     @Native
+    @SuppressWarnings("unused")
     private RistrettoPoint basePoint;
 
     @Native
+    @SuppressWarnings("unused")
     private RistrettoPoint blindingBasePoint;
 
     @Native
-    private boolean useDefault;
+    @SuppressWarnings("unused")
+    private final boolean useDefault;
 
-    public Generator(RistrettoPoint basePoint, RistrettoPoint blindingBasePoint) {
+    public Generator(@NotNull RistrettoPoint basePoint, @NotNull RistrettoPoint blindingBasePoint) {
         this.basePoint = basePoint;
         this.blindingBasePoint = blindingBasePoint;
+        useDefault = false;
     };
 
     public Generator() {
         useDefault = true;
-
     }
 
 

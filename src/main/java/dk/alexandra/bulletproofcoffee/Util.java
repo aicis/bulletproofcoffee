@@ -4,8 +4,8 @@ import java.math.BigInteger;
 
 public class Util {
     public static byte[] convertBigInteger(BigInteger value) {
-        if (value.compareTo(BigInteger.ZERO) <= 0) {
-            throw new IllegalArgumentException("Value has to be positive and non-zero");
+        if (value.compareTo(BigInteger.ZERO) < 0) {
+            throw new IllegalArgumentException("Value has to be positive");
         }
         var bytes = value.toByteArray();
         if (bytes.length < 32) {
