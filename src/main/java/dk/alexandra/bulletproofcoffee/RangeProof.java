@@ -1,7 +1,7 @@
 package dk.alexandra.bulletproofcoffee;
 
-import dk.alexandra.bulletproofcoffee.pedersen.Blinding;
-import dk.alexandra.bulletproofcoffee.pedersen.Commitment;
+import dk.alexandra.bulletproofcoffee.pedersen.Scalar;
+import dk.alexandra.bulletproofcoffee.pedersen.RistrettoPoint;
 
 public class RangeProof {
 
@@ -17,7 +17,7 @@ public class RangeProof {
      * @param bound upper bound `n`, must be a power of 2
      * @return a pair consisting of a proof and commitment
      */
-    public native static Triple<Proof, Commitment, Blinding> proveRange(long secret, int bound);
+    public native static Triple<Proof, RistrettoPoint, Scalar> proveRange(long secret, int bound);
 
     /**
      *  Verify a range proof
@@ -25,6 +25,6 @@ public class RangeProof {
      * @param commitment used for verifying
      * @return true if the proof is valid
      */
-    public native static boolean verify(Proof proof, Commitment commitment, int bound);
+    public native static boolean verify(Proof proof, RistrettoPoint commitment, int bound);
 
 }

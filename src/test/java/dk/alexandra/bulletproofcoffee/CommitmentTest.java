@@ -1,7 +1,6 @@
 package dk.alexandra.bulletproofcoffee;
 
-import dk.alexandra.bulletproofcoffee.pedersen.Blinding;
-import dk.alexandra.bulletproofcoffee.pedersen.Commitment;
+import dk.alexandra.bulletproofcoffee.pedersen.Scalar;
 import dk.alexandra.bulletproofcoffee.pedersen.Committer;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,7 @@ class CommitmentTest {
         var pair = Committer.commit(123);
         var commit = pair.fst();
         var blinding = pair.snd();
-        assertTrue(commit.verify(123, blinding));
+        assertTrue(Committer.verify(commit, 123, blinding));
     }
 
     @Test
@@ -26,7 +25,7 @@ class CommitmentTest {
         var pair = Committer.commit(BigInteger.TEN);
         var commit = pair.fst();
         var blinding = pair.snd();
-        assertTrue(commit.verify(BigInteger.TEN, blinding));
+        assertTrue(Committer.verify(commit, BigInteger.TEN, blinding));
     }
 
 
@@ -38,7 +37,7 @@ class CommitmentTest {
         var blinding = new BigInteger(32*4, rand);
         var pair = Committer.commit(BigInteger.TEN, blinding);
         var commit = pair.fst();
-        assertTrue(commit.verify(BigInteger.TEN, new Blinding(blinding)),
+        assertTrue(Committer.verify(commit, BigInteger.TEN, new Scalar(blinding)),
                 "rust blinding: "+ Arrays.toString(pair.snd().bytes()) +
                         "\njava blinding: "+ Arrays.toString(blinding.toByteArray())
         );
@@ -49,7 +48,7 @@ class CommitmentTest {
         var pair = Committer.commit(2323);
         var commit = pair.fst();
         var blinding = pair.snd();
-        assertFalse(commit.verify(2322, blinding));
+        assertFalse(Committer.verify(commit, 2322, blinding));
     }
 
     @Test
@@ -65,7 +64,7 @@ class CommitmentTest {
         var v3 = 0x3333 + 0x6666;
 
         var b3 = b1.add(b2);
-        assertTrue(c3.verify(v3, b3));
+        assertTrue(Committer.verify(c3, v3, b3));
 
     }
 
@@ -87,7 +86,7 @@ class CommitmentTest {
         assertTrue(v3 != v1 + v2);
 
         var b3 = b1.add(b2);
-        assertFalse(c3.verify(v3, b3));
+        assertFalse(Committer.verify(c3, v3, b3));
 
     }
 
@@ -109,7 +108,7 @@ class CommitmentTest {
         var v3 = v1.add(v2);
 
         var b3 = b1.add(b2);
-        assertTrue(c3.verify(v3, b3),
+        assertTrue(Committer.verify(c3, v3, b3),
                 "Blinds:\n"
         );
     }

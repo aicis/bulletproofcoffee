@@ -3,17 +3,15 @@ package dk.alexandra.bulletproofcoffee.pedersen;
 import dk.alexandra.bulletproofcoffee.Util;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 
 /**
  * Blinding or randomness used for verifying a commitment.
  */
-public final class Blinding {
+public final class Scalar {
     private final byte[] bytes;
 
-    public Blinding(byte[] bytes) {
+    public Scalar(byte[] bytes) {
         Objects.requireNonNull(bytes);
         if (bytes.length != 32) {
             throw new IllegalArgumentException("Commitment length has to be 32");
@@ -21,7 +19,7 @@ public final class Blinding {
         this.bytes = bytes;
     }
 
-    public Blinding(BigInteger integer) {
+    public Scalar(BigInteger integer) {
         this.bytes = Util.convertBigInteger(integer);
     }
 
@@ -29,7 +27,7 @@ public final class Blinding {
         return new BigInteger(bytes);
     }
 
-    public native Blinding add(Blinding other);
+    public native Scalar add(Scalar other);
 
     public byte[] bytes() {
         return bytes;

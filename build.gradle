@@ -11,10 +11,15 @@ repositories {
 
 // TODO: add more targets and possibly find a better way
 // TODO: use `cross` and name them different things when shipping
-task wrapLibrary(type: Exec) {
-    workingDir "rust-jni"
-    commandLine "make", "native"
-    commandLine "bash", "-c", "cp target/release/libjava_ffi.dylib ../src/main/resources/native"
+task wrapLibrary() {
+    exec {
+        commandLine "cp", "rust-jni/target/x86_64-apple-darwin/release/libjava_ffi.dylib",
+                "src/main/resources/native/libjava_ffi_x86_64.dylib"
+    }
+    exec {
+        commandLine "cp", "rust-jni/target/aarch64-apple-darwin/release/libjava_ffi.dylib",
+                "src/main/resources/native/libjava_ffi_aarch64.dylib"
+    }
 }
 
 

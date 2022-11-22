@@ -5,8 +5,8 @@ use thiserror::Error;
 
 pub const TRANSSCRIPT_LABEL: &[u8] = b"";
 
-pub const COMMITMENT_CLASS: &str = "dk/alexandra/bulletproofcoffee/pedersen/Commitment";
-pub const BLINDING_CLASS: &str = "dk/alexandra/bulletproofcoffee/pedersen/Blinding";
+pub const RISTRETTO_POINT_CLASS: &str = "dk/alexandra/bulletproofcoffee/pedersen/RistrettoPoint";
+pub const SCALAR_CLASS: &str = "dk/alexandra/bulletproofcoffee/pedersen/Scalar";
 pub const PROOF_CLASS: &str = "dk/alexandra/bulletproofcoffee/Proof";
 pub const PAIR_CLASS: &str = "dk/alexandra/bulletproofcoffee/Pair";
 pub const TRIPLE_CLASS: &str = "dk/alexandra/bulletproofcoffee/Triple";

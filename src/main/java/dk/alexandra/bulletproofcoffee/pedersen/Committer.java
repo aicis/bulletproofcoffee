@@ -5,7 +5,6 @@ import dk.alexandra.bulletproofcoffee.Pair;
 import dk.alexandra.bulletproofcoffee.Util;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class Committer {
 
@@ -18,7 +17,7 @@ public class Committer {
      * @return a pair consisting of generated commitment and the secret randomness to verify it
      * @throws IllegalArgumentException if value is negative.
      */
-    public static native Pair<Commitment, Blinding> commit(long value);
+    public static native Pair<RistrettoPoint, Scalar> commit(long value);
 
 
     /**
@@ -27,10 +26,10 @@ public class Committer {
      * @throws IllegalArgumentException if the supplied BigInteger is negative or zero,
      * or over 32 bytes long.
      */
-    public static Pair<Commitment, Blinding> commit(BigInteger value) {
+    public static Pair<RistrettoPoint, Scalar> commit(BigInteger value) {
         return commit(Util.convertBigInteger(value));
     }
-    private static native Pair<Commitment, Blinding> commit(byte[] value);
+    private static native Pair<RistrettoPoint, Scalar> commit(byte[] value);
 
     /**
      * @param value Value to commit using OS randomness
@@ -39,12 +38,22 @@ public class Committer {
      * @throws IllegalArgumentException if the supplied BigInteger is negative or zero,
      * or over 32 bytes long.
      */
-    public static Pair<Commitment, Blinding> commit(BigInteger value, BigInteger blinding) {
+    public static Pair<RistrettoPoint, Scalar> commit(BigInteger value, BigInteger blinding) {
         var v = Util.convertBigInteger(value);
         var b = Util.convertBigInteger(blinding);
         return commit(v,b);
     }
 
-    private static native Pair<Commitment, Blinding> commit(byte[] value, byte[] blinding);
+    private static native Pair<RistrettoPoint, Scalar> commit(byte[] value, byte[] blinding);
+
+
+    public static native boolean verify(RistrettoPoint commitment, long value, Scalar blinding);
+
+    private static native boolean verify(RistrettoPoint commitment, byte[] value, Scalar blinding);
+
+
+    public static boolean verify(RistrettoPoint commitment, BigInteger value, Scalar blinding) {
+        return verify(commitment, Util.convertBigInteger(value), blinding);
+    }
 
 }

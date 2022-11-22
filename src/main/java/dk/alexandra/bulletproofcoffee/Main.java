@@ -1,10 +1,8 @@
 package dk.alexandra.bulletproofcoffee;
 
-import dk.alexandra.bulletproofcoffee.pedersen.Blinding;
 import dk.alexandra.bulletproofcoffee.pedersen.Committer;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class Main {
 
@@ -19,7 +17,7 @@ public class Main {
         var c3 = c1.add(c2);
         var b3 = b1.add(b2);
         System.out.println(b3.toBigInteger());
-        System.out.println(c3.verify(new BigInteger("3"), b3));
+        System.out.println(Committer.verify(c1, new BigInteger("3"), b3));
 
     }
 }
