@@ -3,6 +3,7 @@ package dk.alexandra.bulletproofcoffee.pedersen;
 import dk.alexandra.bulletproofcoffee.Util;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -33,4 +34,20 @@ public final class Scalar {
         return bytes;
     }
 
+
+    @Override
+    public boolean equals(Object obj) {
+        if (super.equals(obj)) {
+            return true;
+        }
+        if (obj instanceof Scalar other) {
+            return Arrays.equals(this.bytes, other.bytes);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return new BigInteger(1, bytes).toString();
+    }
 }

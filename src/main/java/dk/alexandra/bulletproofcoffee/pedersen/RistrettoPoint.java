@@ -4,6 +4,8 @@ import dk.alexandra.bulletproofcoffee.FFILoader;
 import dk.alexandra.bulletproofcoffee.Util;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,6 +63,22 @@ public class RistrettoPoint {
      */
     public native static RistrettoPoint sum(List<RistrettoPoint> others);
 
+    @Override
+    public boolean equals(Object obj) {
+        if (super.equals(obj)) {
+            return true;
+        }
+        if (obj instanceof RistrettoPoint other) {
+            return Arrays.equals(this.bytes, other.bytes);
+        }
+        return false;
+    }
 
-
+    @Override
+    public String toString() {
+        String hex = new BigInteger(1, bytes).toString(16);
+        return "RistrettoPoint{" +
+                "bytes=" + hex +
+                '}';
+    }
 }

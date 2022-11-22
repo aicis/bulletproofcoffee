@@ -1,11 +1,15 @@
 package dk.alexandra.bulletproofcoffee;
 
 import dk.alexandra.bulletproofcoffee.pedersen.RistrettoPoint;
+import dk.alexandra.bulletproofcoffee.pedersen.Scalar;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RistrettoTest {
 
@@ -44,5 +48,14 @@ public class RistrettoTest {
         }
         RistrettoPoint.sum(list);
         // assume ok if nothing fails
+    }
+
+    @Test
+    public void testMul() {
+        var two = new Scalar(BigInteger.TWO);
+        var p = getPoint();
+        var p2 = p.mul(two);
+        var p3 = p.add(p);
+        assertEquals(p3, p2);
     }
 }

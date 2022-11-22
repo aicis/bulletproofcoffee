@@ -20,6 +20,10 @@ task wrapLibrary() {
         commandLine "cp", "rust-jni/target/aarch64-apple-darwin/release/libjava_ffi.dylib",
                 "src/main/resources/native/libjava_ffi_aarch64.dylib"
     }
+    exec {
+        commandLine "cp", "rust-jni/target/x86_64-unknown-linux-gnu/release/libjava_ffi.so",
+                "src/main/resources/native/libjava_ffi_x86_64.so"
+    }
 }
 
 

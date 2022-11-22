@@ -37,7 +37,8 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Ristr
     other: jobject, // Scalar
 ) -> jobject {
     let this = lookup_bytes_as_array(env, this).unwrap();
-    let other = lookup_bytes_as_array(env, other).unwrap();
+    let mut other = lookup_bytes_as_array(env, other).unwrap();
+    other.reverse();
 
     let Some(point) = CompressedRistretto::from_slice(&this).decompress() else {
         let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Non-canonical form");
