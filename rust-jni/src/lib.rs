@@ -2,6 +2,7 @@
 #![allow(clippy::missing_safety_doc)]
 #![allow(dead_code)]
 
-mod prelude;
 pub mod commitment;
+mod prelude;
 pub mod rangeproof;
+mod ristretto;

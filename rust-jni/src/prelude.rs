@@ -123,7 +123,7 @@ pub fn new_triple<'a>(
     Ok(pair)
 }
 
-pub fn unwrap_or_throw<T>(env: &JNIEnv, res: Result<T>, error_val : T) -> T {
+pub fn unwrap_or_throw<T>(env: &JNIEnv, res: Result<T>, error_val: T) -> T {
     match res {
         Ok(res) => res,
         Err(e) => {
