@@ -5,6 +5,7 @@ use thiserror::Error;
 
 pub const TRANSSCRIPT_LABEL: &[u8] = b"";
 
+pub const GENERATOR_CLASS: &str = "dk/alexandra/bulletproofcoffee/pedersen/RistrettoPoint";
 pub const RISTRETTO_POINT_CLASS: &str = "dk/alexandra/bulletproofcoffee/pedersen/RistrettoPoint";
 pub const SCALAR_CLASS: &str = "dk/alexandra/bulletproofcoffee/pedersen/Scalar";
 pub const PROOF_CLASS: &str = "dk/alexandra/bulletproofcoffee/Proof";

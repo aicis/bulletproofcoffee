@@ -1,5 +1,6 @@
 package dk.alexandra.bulletproofcoffee;
 
+import dk.alexandra.bulletproofcoffee.pedersen.Generator;
 import dk.alexandra.bulletproofcoffee.pedersen.RistrettoPoint;
 import dk.alexandra.bulletproofcoffee.pedersen.Scalar;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,5 +58,12 @@ public class RistrettoTest {
         var p2 = p.mul(two);
         var p3 = p.add(p);
         assertEquals(p3, p2);
+    }
+
+
+    @Test
+    void testCustomGenerator() {
+        var gen = new Generator(getPoint(), getPoint());
+        gen.commit(2);
     }
 }

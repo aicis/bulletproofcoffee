@@ -12,8 +12,33 @@ use jni::sys::jbyteArray;
 use jni::JNIEnv;
 use rand::thread_rng;
 
-fn get_pc_gens(_env: JNIEnv, _obj: JObject) -> PedersenGens {
-    PedersenGens::default()
+fn get_pc_gens(env: JNIEnv, obj: JObject) -> PedersenGens {
+    let use_default = env.get_field(obj, "useDefault", "Z").unwrap().z().unwrap();
+    if use_default {
+        PedersenGens::default()
+    } else {
+        println!("Using something new");
+        let field_type = "L".to_owned()+RISTRETTO_POINT_CLASS+";";
+        let basepoint = env.get_field(obj, "basePoint", &field_type).unwrap().l().unwrap();
+        let blinding_basepoint = env.get_field(obj, "basePoint", &field_type).unwrap().l().unwrap();
+        let basepoint = lookup_bytes_as_array(env, *basepoint).unwrap();
+        let blinding_basepoint = lookup_bytes_as_array(env, *blinding_basepoint).unwrap();
+
+        let Some(basepoint) = CompressedRistretto::from_slice(&basepoint).decompress() else {
+            let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Basepoint malformed");
+            return PedersenGens::default();
+        };
+        let Some(blinding_basepoint) = CompressedRistretto::from_slice(&blinding_basepoint).decompress() else {
+            let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Blinding basepoint malformed");
+            return PedersenGens::default();
+        };
+
+        PedersenGens {
+            B: basepoint,
+            B_blinding: blinding_basepoint
+        }
+    }
+
 }
 
 #[allow(non_snake_case)]

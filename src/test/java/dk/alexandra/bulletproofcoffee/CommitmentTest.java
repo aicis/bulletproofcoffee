@@ -14,6 +14,7 @@ class CommitmentTest {
 
     static Generator committer = new Generator();
 
+
     @Test
     void verifyLong() {
         var pair = committer.commit(123);
