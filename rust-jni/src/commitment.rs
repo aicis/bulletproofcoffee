@@ -12,17 +12,21 @@ use jni::sys::jbyteArray;
 use jni::JNIEnv;
 use rand::thread_rng;
 
+fn get_pc_gens(_env: JNIEnv, _obj: JObject) -> PedersenGens {
+    PedersenGens::default()
+}
+
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit__J(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_commit__J(
     env: JNIEnv,
-    _jclass: JClass,
+    this : jobject,
     value: jlong,
 ) -> jobject {
     let value: u64 = value as u64;
     let value = Scalar::from(value);
     let blinding = Scalar::random(&mut thread_rng());
-    let pc_gens = PedersenGens::default();
+    let pc_gens = get_pc_gens(env, JObject::from_raw(this));
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
     let Ok(commit) = new_object(env, RISTRETTO_POINT_CLASS, commit.as_bytes()) else {
@@ -38,9 +42,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit___3B(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_commit___3B(
     env: JNIEnv,
-    _jclass: JClass,
+    this : jobject,
     value: jbyteArray,
 ) -> jobject {
     let value = env.convert_byte_array(value).unwrap();
@@ -51,7 +55,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let value = Scalar::from_bytes_mod_order(value);
 
     let blinding = Scalar::random(&mut thread_rng());
-    let pc_gens = PedersenGens::default();
+    let pc_gens = get_pc_gens(env, JObject::from_raw(this));
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
     let commit = new_object(env, RISTRETTO_POINT_CLASS, commit.as_bytes())
@@ -73,9 +77,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_commit___3B_3B(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_commit___3B_3B(
     env: JNIEnv,
-    _jclass: JClass,
+    this : jobject,
     value: jbyteArray,
     blinding: jbyteArray,
 ) -> jobject {
@@ -93,7 +97,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     blinding.reverse(); // from big endian to little
     let blinding = Scalar::from_bytes_mod_order(blinding);
 
-    let pc_gens = PedersenGens::default();
+    let pc_gens = get_pc_gens(env, JObject::from_raw(this));
     let commit = pc_gens.commit(value, blinding);
     let commit = commit.compress();
     let commit = new_object(env, RISTRETTO_POINT_CLASS, commit.as_bytes())
@@ -108,9 +112,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_verify__Ldk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_2JLdk_alexandra_bulletproofcoffee_pedersen_Scalar_2(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_verify__Ldk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_2JLdk_alexandra_bulletproofcoffee_pedersen_Scalar_2(
     env: JNIEnv,
-    _class: jclass,
+    this : jobject,
     object: jobject,
     value: jbyteArray,
     blinding: jobject,
@@ -118,7 +122,8 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let value = Scalar::from(value as u64);
     let object = JObject::from_raw(object);
     let blinding = JObject::from_raw(blinding);
-    verify(env, object, value, blinding)
+    let this = JObject::from_raw(this);
+    verify(env, this, object, value, blinding)
         .unwrap_or_else(|| {
             let _ = env.throw_new(
                 ILLEGAL_ARGUMENT_EXCEPTION_CLASS,
@@ -131,9 +136,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 
 #[allow(non_snake_case)]
 #[no_mangle]
-pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Committer_verify__Ldk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_2_3BLdk_alexandra_bulletproofcoffee_pedersen_Scalar_2(
+pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Generator_verify__Ldk_alexandra_bulletproofcoffee_pedersen_RistrettoPoint_2_3BLdk_alexandra_bulletproofcoffee_pedersen_Scalar_2(
     env: JNIEnv,
-    _class: jclass,
+    this : jobject,
     object: jobject,
     value: jbyteArray,
     blinding: jobject,
@@ -146,14 +151,15 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let value = Scalar::from_bytes_mod_order(value);
     let blinding = JObject::from_raw(blinding);
     let object = JObject::from_raw(object);
-    let Some(check) = verify(env, object, value, blinding) else {
+    let this = JObject::from_raw(this);
+    let Some(check) = verify(env, this, object, value, blinding) else {
         let _ = env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, "Invalid commitment, not a canonical risretto point");
         return 0;
     };
     check.into()
 }
 
-fn verify(env: JNIEnv, object: JObject, value: Scalar, blinding: JObject) -> Option<bool> {
+fn verify(env: JNIEnv, this: JObject, object: JObject, value: Scalar, blinding: JObject) -> Option<bool> {
     let commit = lookup_bytes_as_array(env, *object).unwrap();
     let commit = CompressedRistretto::from_slice(&commit);
     let commit = commit.decompress()?;
@@ -165,7 +171,7 @@ fn verify(env: JNIEnv, object: JObject, value: Scalar, blinding: JObject) -> Opt
     blinding.reverse();
     let blinding = Scalar::from_canonical_bytes(blinding)?;
 
-    let pc_gens = PedersenGens::default();
+    let pc_gens = get_pc_gens(env, this);
     let check = pc_gens.commit(value, blinding) == commit;
     Some(check)
 }

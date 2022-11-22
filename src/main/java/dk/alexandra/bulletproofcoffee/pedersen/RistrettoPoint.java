@@ -3,6 +3,7 @@ package dk.alexandra.bulletproofcoffee.pedersen;
 import dk.alexandra.bulletproofcoffee.FFILoader;
 import dk.alexandra.bulletproofcoffee.Util;
 
+import java.lang.annotation.Native;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HexFormat;
@@ -22,6 +23,7 @@ public class RistrettoPoint {
     }
 
     // JNI requires that this is called bytes
+    @Native
     private final byte[] bytes;
 
     // The Native JNI calls depends on this signature

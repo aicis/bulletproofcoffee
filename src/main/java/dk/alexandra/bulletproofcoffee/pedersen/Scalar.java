@@ -2,6 +2,7 @@ package dk.alexandra.bulletproofcoffee.pedersen;
 
 import dk.alexandra.bulletproofcoffee.Util;
 
+import java.lang.annotation.Native;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.Objects;
  * Blinding or randomness used for verifying a commitment.
  */
 public final class Scalar {
+    @Native
     private final byte[] bytes;
 
     public Scalar(byte[] bytes) {
