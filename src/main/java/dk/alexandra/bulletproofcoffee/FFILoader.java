@@ -1,6 +1,5 @@
 package dk.alexandra.bulletproofcoffee;
 
-import javax.management.RuntimeMBeanException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,13 +9,31 @@ import java.util.Locale;
 public class FFILoader {
     private static boolean isLoaded;
 
+    private final static String PATH = "release/";
+    private final static String NAME = "java_ffi";
+
+
     public enum OS {
-        WINDOWS, LINUX, MAC, SOLARIS
+        WINDOWS("pc-windows-gnu/"+PATH+NAME+".dll"),
+        MAC("apple-darwin/"+PATH+"lib"+NAME+".dylib"),
+        LINUX("unknown-linux-gnu/"+PATH+"lib"+NAME+".so"),
+        SOLARIS("unknown-linux-gnu/"+PATH+"lib"+NAME+".so");
+
+        public final String label;
+
+        OS(String label) {
+            this.label = label;
+        }
     }
 
-    public enum ARCH {
-        X86_64,
-        AARCH64,
+    public enum Arch {
+        X86_64("x86_64"),
+        AARCH64("aarch64");
+        public final String prefix;
+
+        Arch(String prefix) {
+            this.prefix = prefix;
+        }
     }
 
     public static void loadLibrary() {
@@ -24,31 +41,15 @@ public class FFILoader {
             return;
         }
 
-        String lib = null;
-        switch (getOS()) {
-            case LINUX -> {switch (getArch()) {
-                case X86_64 -> lib = "libjava_ffi_x86.so";
-                case AARCH64 -> lib = "libjava_ffi_aarch64.so";
-            }}
-            case MAC -> {switch (getArch()) {
-                case X86_64 -> lib = "libjava_ffi_x86.dylib";
-                case AARCH64 -> lib = "libjava_ffi_aarch64.dylib";
-            }}
-            case WINDOWS -> {switch (getArch()) {
-                case X86_64 -> lib = "libjava_ffi_x86.dll";
-                case AARCH64 -> throw new RuntimeException("No windows library for "+getArch()+" found");
-            }}
-        }
+        OS os = getOS();
+        String lib = getArch().prefix + "-" + os.label;
+
 
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            var link = classLoader.getResourceAsStream("native/"+lib);
+            var link = classLoader.getResourceAsStream(lib);
             if (link == null) {
-                link = classLoader.getResourceAsStream("native/libjava_ffi.dylib");
-                if (link == null) {
-                    throw new RuntimeException("Could not find bundled native library: native/"+lib);
-                }
-                System.err.println("Could not find target library, using default");
+                throw new RuntimeException("Could not find bundled native library: native/"+lib);
             }
             var tmp = File.createTempFile("temp", "lib");
             tmp.deleteOnExit();
@@ -78,12 +79,12 @@ public class FFILoader {
         throw new RuntimeException("Unknown OS: "+os);
     }
 
-    private static ARCH getArch() {
+    private static Arch getArch() {
         var arch =  System.getProperty("os.arch", "generic").toLowerCase(Locale.ENGLISH);
         if (arch.contains("x86")) {
-            return ARCH.X86_64;
+            return Arch.X86_64;
         } else if (arch.contains("aarch64")) {
-            return ARCH.AARCH64;
+            return Arch.AARCH64;
         }
         throw new RuntimeException("Unknown architecture: "+arch);
     }

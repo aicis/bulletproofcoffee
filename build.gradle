@@ -9,23 +9,15 @@ repositories {
     mavenCentral()
 }
 
-// TODO: add more targets and possibly find a better way
-// TODO: use `cross` and name them different things when shipping
-task wrapLibrary() {
-    exec {
-        commandLine "cp", "rust-jni/target/x86_64-apple-darwin/release/libjava_ffi.dylib",
-                "src/main/resources/native/libjava_ffi_x86_64.dylib"
+task wrapLibrary(type: Copy) {
+    from ("rust-jni/target/") {
+        include "**/release/libjava_ffi.so"
+        include "**/release/libjava_ffi.dylib"
+        include "**/release/java_ffi.dll"
     }
-    exec {
-        commandLine "cp", "rust-jni/target/aarch64-apple-darwin/release/libjava_ffi.dylib",
-                "src/main/resources/native/libjava_ffi_aarch64.dylib"
-    }
-    exec {
-        commandLine "cp", "rust-jni/target/x86_64-unknown-linux-gnu/release/libjava_ffi.so",
-                "src/main/resources/native/libjava_ffi_x86_64.so"
-    }
+    includeEmptyDirs = false
+    into "src/main/resources/"
 }
-
 
 compileJava.dependsOn wrapLibrary
 
