@@ -13,6 +13,7 @@ pub const TRIPLE_CLASS: &str = "dk/alexandra/bulletproofcoffee/Triple";
 pub const BULLET_PROOF_EXCEPTION_CLASS: &str =
     "dk/alexandra/bulletproofcoffee/BulletProofException";
 pub const ILLEGAL_ARGUMENT_EXCEPTION_CLASS: &str = "java/lang/IllegalArgumentException";
+pub const RUNTIME_EXCEPTION_CLASS: &str = "java/lang/RuntimeException";
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -120,4 +121,14 @@ pub fn new_triple<'a>(
         &[JValue::from(fst), JValue::from(snd), JValue::from(trd)],
     )?;
     Ok(pair)
+}
+
+pub fn unwrap_or_throw<T>(env: &JNIEnv, res: Result<T>, error_val : T) -> T {
+    match res {
+        Ok(res) => res,
+        Err(e) => {
+            let _ = env.throw_new(RUNTIME_EXCEPTION_CLASS, e.to_string());
+            error_val
+        }
+    }
 }

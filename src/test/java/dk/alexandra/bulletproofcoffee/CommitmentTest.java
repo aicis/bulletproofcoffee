@@ -38,7 +38,7 @@ class CommitmentTest {
         var blinding = new BigInteger(32*4, rand);
         var pair = Committer.commit(BigInteger.TEN, blinding);
         var commit = pair.fst();
-        assertTrue(commit.verify(BigInteger.TEN, Blinding.from(blinding)),
+        assertTrue(commit.verify(BigInteger.TEN, new Blinding(blinding)),
                 "rust blinding: "+ Arrays.toString(pair.snd().bytes()) +
                         "\njava blinding: "+ Arrays.toString(blinding.toByteArray())
         );

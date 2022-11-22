@@ -100,10 +100,7 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
     let blinding =
         new_object(env, BLINDING_CLASS, &blinding).expect("failed constructing Blinding object");
     let pair = new_pair(env, commit, blinding);
-    match pair {
-        Ok(obj) => *obj,
-        _ => *JObject::null(),
-    }
+    *unwrap_or_throw(&env, pair, JObject::null())
 }
 
 #[allow(non_snake_case)]
@@ -153,13 +150,9 @@ pub unsafe extern "system" fn Java_dk_alexandra_bulletproofcoffee_pedersen_Commi
 
 fn verify(env: JNIEnv, object: JObject, value: Scalar, blinding: JObject) -> Option<bool> {
     let commit = lookup_bytes_as_array(env, *object).unwrap();
-    // let commit = env.get_field(object, COMMITMENT_CLASS, "commitment").unwrap();
-    // let commit : Vec<u8> = env.convert_byte_array(*commit.l().unwrap()).unwrap();
     let commit = CompressedRistretto::from_slice(&commit);
     let commit = commit.decompress()?;
 
-    // let blinding = env.get_field(object, COMMITMENT_CLASS, "blinding").unwrap();
-    // let blinding : Vec<u8> = env.convert_byte_array(*blinding.l().unwrap()).unwrap();
     let blinding = lookup_bytes(env, *blinding).unwrap();
     let mut blinding: [u8; 32] = blinding
         .try_into()

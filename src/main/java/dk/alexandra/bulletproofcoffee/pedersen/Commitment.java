@@ -37,8 +37,7 @@ public class Commitment {
         return verify(Util.convertBigInteger(value), blinding);
     }
 
-    // The Native JNI calls depends on this signature
-    public byte[] asBytes() {
+    public byte[] bytes() {
         return bytes;
     }
 

@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 base64 = "0.13.1"
-bulletproofs = "4.0.0"
+bulletproofs = { path="/Users/mikkel/Projects/fintech/libraries/bulletproofs" }
 curve25519-dalek = { package = "curve25519-dalek-ng", version = "4.1" }
 jni = "0.20.0"
 merlin = "3.0.0"

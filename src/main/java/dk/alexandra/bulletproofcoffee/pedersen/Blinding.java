@@ -21,10 +21,9 @@ public final class Blinding {
         this.bytes = bytes;
     }
 
-    public static Blinding from(BigInteger integer) {
-        return new Blinding(Util.convertBigInteger(integer));
+    public Blinding(BigInteger integer) {
+        this.bytes = Util.convertBigInteger(integer);
     }
-
 
     public BigInteger toBigInteger() {
         return new BigInteger(bytes);
