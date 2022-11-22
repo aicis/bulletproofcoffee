@@ -34,7 +34,14 @@ public class RistrettoPoint {
         return bytes;
     }
 
-    public static native RistrettoPoint fromHash(byte[] digest);
+    /**
+     * Constructs a RistrettoPoint from uniformly distributed bytes, which maps using elligator
+     * to a uniformly distributed RistrettoPoint.
+     * @param bytes a byte array of size 64
+     * @return uniformly distributed RistrettoPoint
+     * @throws IllegalArgumentException if bytes is any other length than 64
+     */
+    public static native RistrettoPoint fromUniformBytes(byte[] bytes);
 
     /**
      * @param other Scalar to multiply with
