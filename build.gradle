@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group 'dk.alexandra'
@@ -16,7 +17,7 @@ task wrapLibrary(type: Copy) {
         include "**/release/java_ffi.dll"
     }
     includeEmptyDirs = false
-    into "src/main/resources/"
+    into "src/main/resources/native"
 }
 
 compileJava.dependsOn wrapLibrary
@@ -35,4 +36,12 @@ jar {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
 }

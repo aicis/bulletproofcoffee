@@ -12,8 +12,8 @@ import java.util.Objects;
  */
 public final class Scalar {
 
-    public final static BigInteger ORDER
-            = new BigInteger("57896044618658097711785492504343953926856930875039260848015607506283634007912");
+    public final static BigInteger ORDER /* p = 2^255 - 19 */
+            = new BigInteger("57896044618658097711785492504343953926634992332820282019728792003956564819949");
 
     @Native
     private final byte[] bytes;

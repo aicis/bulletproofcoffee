@@ -42,7 +42,7 @@ public class FFILoader {
         }
 
         OS os = getOS();
-        String lib = getArch().prefix + "-" + os.label;
+        String lib = "native/" + getArch().prefix + "-" + os.label;
 
 
         try {
