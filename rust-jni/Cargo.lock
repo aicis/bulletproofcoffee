@@ -26,7 +26,8 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "bulletproofs"
-version = "5.0.0"
+version = "4.0.1"
+source = "git+https://github.com/aicis/bulletproofs.git#3c2429bd0ef48246de5bfcc3572f347cc0afe360"
 dependencies = [
  "byteorder",
  "curve25519-dalek-ng",
