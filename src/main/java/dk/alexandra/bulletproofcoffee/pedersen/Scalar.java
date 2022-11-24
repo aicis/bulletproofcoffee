@@ -31,7 +31,7 @@ public final class Scalar {
     }
 
     public BigInteger toBigInteger() {
-        return new BigInteger(bytes);
+        return new BigInteger(1, bytes).mod(ORDER);
     }
 
     public native Scalar add(Scalar other);
