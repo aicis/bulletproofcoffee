@@ -1,6 +1,5 @@
 package dk.alexandra.bulletproofcoffee;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,7 +87,7 @@ class RangeProofTest {
                 () -> {
                     var triple = RangeProof.proveRange(1037578891, 32);
                     var commitment = triple.snd();
-                    var proof = new Proof(new byte[]{});
+                    var proof = new RangeProof(new byte[]{});
                     RangeProof.verify(proof, commitment, 32);
                 }
         );

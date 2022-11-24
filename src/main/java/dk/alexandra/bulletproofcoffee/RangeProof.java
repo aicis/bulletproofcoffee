@@ -9,7 +9,19 @@ public class RangeProof {
         FFILoader.loadLibrary();
     }
 
-    private RangeProof() {}
+
+    // JNI calls depend on this being called bytes
+    private final byte[] bytes;
+
+    // The Native JNI calls depends on this signature
+    public RangeProof(byte[] proof) {
+        this.bytes = proof;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
 
     /**
      * Construct a range proof
@@ -17,7 +29,7 @@ public class RangeProof {
      * @param bound upper bound `n`, must be a power of 2
      * @return a pair consisting of a proof and commitment
      */
-    public native static Triple<Proof, RistrettoPoint, Scalar> proveRange(long secret, int bound);
+    public native static Triple<RangeProof, RistrettoPoint, Scalar> proveRange(long secret, int bound);
 
     /**
      *  Verify a range proof
@@ -25,6 +37,6 @@ public class RangeProof {
      * @param commitment used for verifying
      * @return true if the proof is valid
      */
-    public native static boolean verify(Proof proof, RistrettoPoint commitment, int bound);
+    public native static boolean verify(RangeProof proof, RistrettoPoint commitment, int bound);
 
 }

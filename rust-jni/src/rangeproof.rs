@@ -42,7 +42,7 @@ fn prove(env: JNIEnv, secret: jlong, bound: jint) -> Result<JObject> {
     )?;
 
     let proof = proof.to_bytes();
-    let proof = new_object(env, PROOF_CLASS, &proof)?;
+    let proof = new_object(env, RANGE_PROOF_CLASS, &proof)?;
     let commit = new_object(env, RISTRETTO_POINT_CLASS, commitment.as_bytes())?;
     let blinding = new_object(env, SCALAR_CLASS, blinding.as_bytes())?;
     new_triple(env, proof, commit, blinding)
