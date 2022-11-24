@@ -73,7 +73,6 @@ public class Generator {
 
     private native Pair<RistrettoPoint, Scalar> commit(byte[] value, byte[] blinding);
 
-
     public native boolean verify(RistrettoPoint commitment, long value, Scalar blinding);
 
     private native boolean verify(RistrettoPoint commitment, byte[] value, Scalar blinding);

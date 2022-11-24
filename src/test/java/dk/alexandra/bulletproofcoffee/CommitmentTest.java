@@ -94,6 +94,42 @@ class CommitmentTest {
     }
 
     @Test
+    void testInverseDarkMagic() {
+        var m = new BigInteger("1001");
+        var r = Scalar.ORDER.subtract(new BigInteger("12345"));
+
+        var rng = new Random();
+        rng.setSeed(0);
+        var neg_r = Scalar.ORDER.subtract(r);
+        var p1 = committer.commit(m);
+        var p2 = committer.commit(r);
+        var b_neg_r = Scalar.ORDER.subtract(p2.snd().toBigInteger());
+        var p3 = committer.commit(neg_r, b_neg_r);
+
+        var c_m = p1.fst();
+        var c_r = p2.fst();
+        var c_neg_r = p3.fst();
+        var b_m = p1.snd();
+        var b_r = p2.snd();
+
+        var blinding = b_m.toBigInteger().subtract(b_r.toBigInteger()).mod(Scalar.ORDER);
+
+        assertTrue(committer.verify(c_m.add(c_neg_r), m.subtract(r).mod(Scalar.ORDER), new Scalar(blinding)));
+
+        var c_diff1= c_m.add(c_neg_r);
+        var b_diff1= b_m.toBigInteger().add(b_neg_r);
+
+
+
+
+
+
+
+
+
+    }
+
+    @Test
     void testAddWithBlinding() {
         var rand = new Random();
         rand.setSeed(7);
